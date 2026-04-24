@@ -1,0 +1,3 @@
+.env
+dontforget/backend/.env
+node_modules/
