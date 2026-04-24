@@ -37,7 +37,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, '../frontend')));
-// ลบ app.use('/uploads', ...) ออกแล้ว — รูปอยู่บน Cloudinary ทั้งหมด
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/auth', require('./routes/auth'));
 app.use('/api/checklists', require('./routes/checklists'));

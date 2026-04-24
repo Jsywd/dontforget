@@ -32,6 +32,7 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
+    /* Gallery Styles */
     .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 20px; }
     .gallery-card { position: relative; background: var(--bg-card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; }
     .gallery-card:hover { transform: scale(1.03); }
@@ -39,6 +40,7 @@
     .gallery-card .caption { padding: 8px; font-size: 0.75rem; color: var(--text-dim); text-align: center; }
     .btn-delete-img { position: absolute; top: 5px; right: 5px; background: rgba(255, 68, 68, 0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; z-index: 10; }
 
+    /* Preview Selection Styles */
     .preview-item { position: relative; width: 80px; height: 80px; }
     .preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent); }
     .preview-item .btn-remove { position: absolute; top: -5px; right: -5px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; font-weight: bold; }
@@ -50,6 +52,7 @@
     .btn-primary { background: var(--accent); color: #000; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
     .btn-primary:hover { background: var(--accent-dark); }
     .btn-primary:disabled { background: #555; cursor: not-allowed; }
+    
     .btn-secondary { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; }
     .btn-secondary:hover { background: #444; }
 
@@ -58,6 +61,7 @@
     #add-place-form.active { display: block; }
 
     .bottom-nav { margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border); text-align: center; }
+    .btn-back-bottom { text-decoration: none; color: var(--text-dim); padding: 10px 20px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border); display: inline-block; }
   </style>
 </head>
 <body>
@@ -82,13 +86,16 @@
         <div style="display:flex; flex-direction:column; gap:12px;">
           <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
             <input type="file" id="gallery-file" accept="image/*" multiple onchange="handleFileSelect(this)" style="display:none;">
+            
             <button class="btn-secondary" onclick="document.getElementById('gallery-file').click()">📁 เลือกรูปภาพ...</button>
             <button class="btn-primary" id="btn-upload-now" onclick="uploadToGallery()" style="display:none;">📤 อัปโหลดรูปที่เลือก</button>
             <button class="btn-secondary" id="btn-cancel-select" onclick="clearSelectedImages()" style="display:none; background:#e74c3c;">✖ ยกเลิกทั้งหมด</button>
           </div>
+
           <div id="selected-preview-list" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:5px;"></div>
         </div>
       </div>
+
       <div id="gallery-list" class="gallery-grid"></div>
     </div>
 
@@ -109,8 +116,7 @@
         <h3 style="margin-top:0">➕ เพิ่มสถานที่ใหม่</h3>
         <input type="text" id="new-place-name" placeholder="ชื่อสถานที่ เช่น โรงแรม, ร้านอาหาร" style="width:97%; margin-bottom:10px;">
         <div style="display:flex; gap:10px; flex-wrap: wrap;">
-          <input type="hidden" id="new-place-lat">
-          <input type="hidden" id="new-place-lng">
+          <input type="hidden" id="new-place-lat"><input type="hidden" id="new-place-lng">
           <button class="btn-primary" onclick="saveNewPlace()">บันทึกพิกัดนี้</button>
           <button class="btn-secondary" onclick="getCurrentLocation()">📍 ใช้ตำแหน่งปัจจุบัน</button>
           <button class="btn-secondary" style="background:#ff4444;" onclick="cancelAddPlace()">ยกเลิก</button>
@@ -121,10 +127,10 @@
     </div>
 
     <footer class="bottom-nav">
-      <button onclick="history.back()" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px;">
-        ⬅️ ย้อนกลับ
-      </button>
-    </footer>
+  <button onclick="history.back()" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px;">
+    ⬅️ ย้อนกลับ
+  </button>
+</footer>
   </main>
 </div>
 
@@ -137,36 +143,42 @@ let mapInstance = null;
 let existingMarkers = [];
 let tempNewMarker = null;
 let currentFullAddress = "";
-let selectedFiles = [];
+
+// ส่วนจัดการรูปภาพ
+let selectedFiles = []; // เก็บไฟล์ที่จะอัพโหลด
 
 const params = new URLSearchParams(location.search);
 const checklistID = params.get("id");
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!checklistID) return;
+  if (checklistID) {
+    await loadChecklistData();
+    
+    const isOwner = checklist.isOwner; // ← เปลี่ยนจาก localStorage
+    const isAdmin = localStorage.getItem('role') === 'admin';
 
-  await loadChecklistData();
-
-  const isOwner = checklist.isOwner;
-  const isAdmin = localStorage.getItem('role') === 'admin';
-
-  if (!isOwner && !isAdmin) {
-    document.querySelectorAll('.add-item-box, #add-place-form').forEach(el => el.style.display = 'none');
-    const style = document.createElement('style');
-    style.innerHTML = `
-      button[onclick*="delete"], button[onclick*="Delete"],
-      .btn-delete-img, .btn-remove, #btn-upload-now,
-      #btn-cancel-select { display: none !important; }
-    `;
-    document.head.appendChild(style);
+    if (!isOwner && !isAdmin) {
+      document.querySelectorAll('.add-item-box, #add-place-form').forEach(el => {
+        el.style.display = 'none';
+      });
+      const style = document.createElement('style');
+      style.innerHTML = `
+        button[onclick*="delete"], button[onclick*="Delete"],
+        .btn-delete-img, .btn-remove, #btn-upload-now,
+        #btn-cancel-select { display: none !important; }
+      `;
+      document.head.appendChild(style);
+    }
+    hideActionsForAdmin();
   }
-
-  hideActionsForAdmin();
 });
+
 
 async function loadChecklistData() {
   try {
-    const res = await fetch(`/api/checklists/${checklistID}`, { credentials: 'include' });
+    const res = await fetch(`/api/checklists/${checklistID}`, { 
+      credentials: 'include'  // ✅ ต้องมี
+    });
     const result = await res.json();
     checklist = result.data;
     renderHeader();
@@ -178,22 +190,34 @@ async function loadChecklistData() {
 }
 
 function hideActionsForAdmin() {
-  const role = localStorage.getItem('role');
-  if (role !== 'admin') return;
+    const role = localStorage.getItem('role');
+    if (role === 'admin') {
+        // 1. ซ่อนกล่อง input ทั้งหมด
+        document.querySelectorAll('.add-item-box, #add-place-form').forEach(el => {
+            el.style.display = 'none';
+        });
 
-  document.querySelectorAll('.add-item-box, #add-place-form').forEach(el => el.style.display = 'none');
-  const mapHint = document.querySelector('#tab-map p');
-  if (mapHint) mapHint.style.display = 'none';
+        // 2. ซ่อนคำแนะนำในหน้าแผนที่ (📍 ค้นหาด้านบน...)
+        const mapHint = document.querySelector('#tab-map p');
+        if (mapHint) mapHint.style.display = 'none';
 
-  const style = document.createElement('style');
-  style.innerHTML = `
-    button[onclick*="delete"], .btn-delete-img, .btn-remove,
-    #btn-upload-now, .leaflet-control-geocoder { display: none !important; }
-  `;
-  document.head.appendChild(style);
+        // 3. ใช้ CSS ซ่อนปุ่มลบและปุ่มจัดการต่างๆ
+        const style = document.createElement('style');
+        style.innerHTML = `
+            button[onclick*="delete"], 
+            .btn-delete-img, 
+            .btn-remove, 
+            #btn-upload-now,
+            .leaflet-control-geocoder { /* ซ่อนตัวค้นหาในแผนที่ด้วย */
+                display: none !important; 
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 function renderHeader() {
+  // ลบ descBox เก่าออกก่อนทุกครั้ง
   const oldDesc = document.getElementById('desc-box');
   if (oldDesc) oldDesc.remove();
 
@@ -201,7 +225,7 @@ function renderHeader() {
   const isOwner = checklist.isOwner;
 
   const copyButtonHTML = (role === 'admin' || isOwner) ? '' : `
-    <button class="btn btn-secondary" onclick="copyChecklistToMyMine()" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+    <button class="btn btn-secondary" onclick="copyChecklistToMyMine()" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
       📥 คัดลอกไปยัง Checklist ของฉัน
     </button>
   `;
@@ -209,8 +233,8 @@ function renderHeader() {
   document.getElementById("detail-header").innerHTML = `
     <div class="detail-cover">✅</div>
     <div class="detail-info">
-      <h2 style="margin:0;color:var(--text-main)">${checklist.title || 'ไม่มีชื่อรายการ'}</h2>
-      <p style="margin:4px 0 0;color:var(--text-dim);font-size:0.8rem;">
+      <h2 style="margin:0; color:var(--text-main)">${checklist.title || 'ไม่มีชื่อรายการ'}</h2>
+      <p style="margin:4px 0 0; color:var(--text-dim); font-size:0.8rem;">
         ${checklist.items?.length || 0} รายการ | ${checklist.allPlaces?.length || 0} สถานที่
       </p>
     </div>
@@ -219,36 +243,46 @@ function renderHeader() {
 
   if (checklist.description) {
     const descBox = document.createElement('div');
-    descBox.id = 'desc-box';
+    descBox.id = 'desc-box'; // ← เพิ่ม id
     descBox.style.cssText = `
-      background:var(--bg-card); border:1px solid var(--border);
-      border-radius:var(--radius); padding:14px 18px; margin-bottom:20px;
-      color:var(--text-dim); font-size:0.88rem; line-height:1.7;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      line-height: 1.7;
     `;
     descBox.innerHTML = `
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">📝 คำอธิบาย</div>
+      <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">📝 คำอธิบาย</div>
       ${checklist.description}
     `;
-    document.getElementById('detail-header').insertAdjacentElement('afterend', descBox);
+    const header = document.getElementById('detail-header');
+    header.insertAdjacentElement('afterend', descBox);
   }
 }
 
-// ─── Gallery ──────────────────────────────────────────────────────────────────
+// --- GALLERY FUNCTIONS ---
 
+// 1. เมื่อมีการเลือกไฟล์
 function handleFileSelect(input) {
   const files = Array.from(input.files);
-  if (!files.length) return;
+  if (files.length === 0) return;
+
+  // เพิ่มไฟล์ใหม่เข้าคิวเดิม
   selectedFiles = [...selectedFiles, ...files];
   renderSelectedPreview();
-  input.value = "";
+  input.value = ""; // ล้างค่า input เพื่อให้เลือกไฟล์เดิมซ้ำได้ถ้าต้องการ
 }
 
+// 2. แสดงรูปภาพที่เลือกไว้ (ก่อนอัพโหลด)
 function renderSelectedPreview() {
   const container = document.getElementById('selected-preview-list');
   const uploadBtn = document.getElementById('btn-upload-now');
   const cancelBtn = document.getElementById('btn-cancel-select');
-
-  container.innerHTML = "";
+  
+  container.innerHTML = ""; 
 
   if (selectedFiles.length > 0) {
     uploadBtn.style.display = "inline-block";
@@ -261,7 +295,7 @@ function renderSelectedPreview() {
 
   selectedFiles.forEach((file, index) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = function(e) {
       const div = document.createElement('div');
       div.className = "preview-item";
       div.innerHTML = `
@@ -269,23 +303,26 @@ function renderSelectedPreview() {
         <button class="btn-remove" onclick="removeSpecificFile(${index})">✕</button>
       `;
       container.appendChild(div);
-    };
+    }
     reader.readAsDataURL(file);
   });
 }
 
+// 3. ลบรูปออกทีละรูปจากคิว
 function removeSpecificFile(index) {
   selectedFiles.splice(index, 1);
   renderSelectedPreview();
 }
 
+// 4. ล้างรูปทั้งหมดที่เลือกไว้
 function clearSelectedImages() {
   selectedFiles = [];
   renderSelectedPreview();
 }
 
+// 5. ส่งไฟล์ไป Server
 async function uploadToGallery() {
-  if (!selectedFiles.length) return;
+  if (selectedFiles.length === 0) return;
 
   const btn = document.getElementById('btn-upload-now');
   btn.disabled = true;
@@ -293,18 +330,21 @@ async function uploadToGallery() {
 
   const formData = new FormData();
   formData.append('checklistID', checklistID);
-  selectedFiles.forEach(file => formData.append('images', file));
+  
+  selectedFiles.forEach(file => {
+    formData.append('images', file); 
+  });
 
   try {
     const res = await fetch('/api/checklist-gallery', {
       method: 'POST',
-      credentials: 'include', // ✅ เพิ่ม
       body: formData
     });
+
     const result = await res.json();
     if (result.success) {
       clearSelectedImages();
-      loadGalleryData();
+      loadGalleryData(); // โหลดรูปที่โชว์ในหน้านั้นใหม่
     } else {
       alert("อัปโหลดไม่สำเร็จ: " + (result.message || "เกิดข้อผิดพลาด"));
     }
@@ -313,18 +353,18 @@ async function uploadToGallery() {
     alert("การเชื่อมต่อ Server ผิดพลาด");
   } finally {
     btn.disabled = false;
-    btn.innerText = `📤 อัปโหลด`;
   }
 }
 
+// 6. ดึงรูปที่อัพโหลดแล้วมาโชว์
 async function loadGalleryData() {
   try {
     const res = await fetch(`/api/checklist-gallery/${checklistID}`);
     const result = await res.json();
     const galleryList = document.getElementById('gallery-list');
-
+    
     if (!result.data || result.data.length === 0) {
-      galleryList.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:40px;">ยังไม่มีรูปภาพรีวิว</p>`;
+      galleryList.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:var(--text-dim); padding:40px;">ยังไม่มีรูปภาพรีวิว</p>`;
       return;
     }
 
@@ -338,36 +378,29 @@ async function loadGalleryData() {
   } catch (e) { console.error("Load gallery error", e); }
 }
 
-// ✅ แก้: ใช้ imageID (ไม่ใช่ itemID) และ endpoint ถูกต้อง
 async function deleteGalleryImage(imageID) {
   if (!confirm("ลบรูปนี้ใช่ไหม?")) return;
-  try {
-    const res = await fetch(`/api/checklist-gallery/${imageID}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
-    const result = await res.json();
-    if (result.success) loadGalleryData();
-    else alert("ลบไม่สำเร็จ: " + result.message);
-  } catch (err) { alert("เกิดข้อผิดพลาด"); }
+  const res = await fetch(`/api/items/${itemID}`, { 
+  method: 'DELETE',
+  credentials: 'include'         // ← เพิ่ม
+});
+  if (res.ok) loadGalleryData();
 }
 
-// ─── Items ────────────────────────────────────────────────────────────────────
+// --- FUNCTIONS อื่นๆ (Items, Places, Map) ---
 
 async function addItem() {
   const input = document.getElementById("item-input");
   const text = input.value.trim();
   if (!text) return;
-  try {
-    await fetch('/api/items', {
-      method: 'POST',
-      credentials: 'include', // ✅
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checklistID, itemText: text })
-    });
-    input.value = "";
-    loadChecklistData();
-  } catch (err) { console.error(err); }
+  await fetch('/api/items', {
+  method: 'POST',
+  credentials: 'include',        // ← เพิ่มบรรทัดนี้
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ checklistID, itemText: text })
+});
+  input.value = "";
+  loadChecklistData();
 }
 
 function renderItems() {
@@ -381,12 +414,10 @@ function renderItems() {
 
   el.innerHTML = checklist.items.map(i => `
     <div class="item-row" id="item-row-${i.itemID}">
-      <div style="display:flex;align-items:center;gap:12px;flex:1;">
-        <input type="checkbox" ${i.isChecked ? 'checked' : ''}
+      <div style="display:flex; align-items:center; gap:12px; flex:1;">
+        <input type="checkbox" ${i.isChecked ? 'checked' : ''} 
           ${isOwner ? `onchange="toggleItem(${i.itemID}, this.checked)"` : 'disabled'}>
-        <span id="item-text-${i.itemID}"
-          style="${i.isChecked ? 'color:#555;text-decoration:line-through;' : ''};flex:1;padding:4px 6px;"
-          ${isOwner ? `ondblclick="startEditItem(${i.itemID})"` : ''}>
+        <span style="${i.isChecked ? 'color:#555;text-decoration:line-through;' : ''}; flex:1; padding:4px 6px;">
           ${i.itemText}
         </span>
       </div>
@@ -402,136 +433,135 @@ function startEditItem(itemID) {
   const span = document.getElementById(`item-text-${itemID}`);
   if (!span) return;
 
+  // แทน span ด้วย input
   const input = document.createElement('input');
   input.type = 'text';
   input.value = item.itemText;
-  input.style.cssText = 'flex:1;padding:6px 10px;background:#2a2a2a;border:1px solid var(--accent);border-radius:6px;color:white;font-size:1rem;outline:none;';
+  input.style.cssText = 'flex:1; padding:6px 10px; background:#2a2a2a; border:1px solid var(--accent); border-radius:6px; color:white; font-size:1rem; outline:none;';
 
   span.replaceWith(input);
   input.focus();
   input.select();
 
+  // บันทึกเมื่อกด Enter
   input.addEventListener('keydown', async (e) => {
     if (e.key === 'Enter') await confirmEditItem(itemID, input.value);
-    if (e.key === 'Escape') renderItems();
+    if (e.key === 'Escape') renderItems(); // ยกเลิก
   });
-  input.addEventListener('blur', async () => await confirmEditItem(itemID, input.value));
+
+  // บันทึกเมื่อคลิกออก
+  input.addEventListener('blur', async () => {
+    await confirmEditItem(itemID, input.value);
+  });
 }
 
-// ✅ แก้: ส่ง itemText (ไม่ใช่ isChecked) และประกาศตัวแปร res ให้ถูก
 async function confirmEditItem(itemID, newText) {
   const text = newText.trim();
-  if (!text) { renderItems(); return; }
+  if (!text) { renderItems(); return; } // ถ้าว่างให้ยกเลิก
 
   const item = checklist.items.find(i => i.itemID === itemID);
-  if (item && text === item.itemText) { renderItems(); return; }
+  if (item && text === item.itemText) { renderItems(); return; } // ไม่มีการเปลี่ยนแปลง
 
   try {
-    const res = await fetch(`/api/items/${itemID}`, {
-      method: 'PUT',
-      credentials: 'include', // ✅
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ itemText: text }) // ✅ แก้จาก isChecked เป็น itemText
-    });
+    await fetch(`/api/items/${itemID}`, {
+  method: 'PUT',
+  credentials: 'include',        // ← เพิ่ม
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ isChecked: isChecked ? 1 : 0 })
+});
     const result = await res.json();
-    if (result.success) loadChecklistData();
-    else { alert(result.message || 'แก้ไขไม่สำเร็จ'); renderItems(); }
-  } catch (err) { renderItems(); }
+    if (result.success) {
+      loadChecklistData();
+    } else {
+      alert(result.message || 'แก้ไขไม่สำเร็จ');
+      renderItems();
+    }
+  } catch (err) {
+    renderItems();
+  }
 }
 
 async function toggleItem(itemID, isChecked) {
-  try {
-    await fetch(`/api/items/${itemID}`, {
-      method: 'PUT',
-      credentials: 'include', // ✅
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isChecked: isChecked ? 1 : 0 })
-    });
-    loadChecklistData();
-  } catch (err) { console.error(err); }
+  await fetch(`/api/items/${itemID}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isChecked: isChecked ? 1 : 0 })
+  });
+  loadChecklistData();
 }
 
 async function deleteItem(itemID) {
-  if (!confirm("ลบรายการนี้?")) return;
-  try {
-    await fetch(`/api/items/${itemID}`, {
-      method: 'DELETE',
-      credentials: 'include' // ✅
-    });
+  if (confirm("ลบรายการนี้?")) {
+    await fetch(`/api/items/${itemID}`, { method: 'DELETE' });
     loadChecklistData();
-  } catch (err) { console.error(err); }
+  }
 }
-
-// ─── Places ───────────────────────────────────────────────────────────────────
 
 function renderPlacesList() {
   const el = document.getElementById("places-list");
   const places = checklist.allPlaces || [];
   const isOwner = checklist.isOwner;
-  const isAdmin = localStorage.getItem('role') === 'admin';
-  const canEdit = isOwner && !isAdmin;
+const isAdmin = localStorage.getItem('role') === 'admin';
+const canEdit = isOwner && !isAdmin;
 
+  // สร้างส่วนหัว และเช็คว่าถ้าไม่ใช่ admin ถึงจะโชว์ปุ่ม "เพิ่มสถานที่"
   let html = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0;">สถานที่</h3>
       ${canEdit ? `<button class="btn-primary" onclick="switchToMapForAdd()">➕ เพิ่มสถานที่</button>` : ''}
     </div>
   `;
 
-  if (!places.length) {
-    html += `<div style="color:var(--text-dim);text-align:center;padding:20px;">ยังไม่มีสถานที่</div>`;
+  if (places.length === 0) {
+    html += `<div style="color:var(--text-dim); text-align:center; padding:20px;">ยังไม่มีสถานที่</div>`;
   } else {
     html += places.map(p => `
       <div class="place-card">
-        <div style="flex:1;padding-right:10px;">
+        <div style="flex:1; padding-right:10px;">
           <strong style="color:var(--accent)">📍 ${p.placeName}</strong><br>
-          <small style="color:var(--text-dim);font-size:0.8rem;display:block;margin-top:4px;">${p.address || ''}</small>
+          <small style="color:var(--text-dim); font-size:0.8rem; display:block; margin-top:4px;">${p.address || ''}</small>
         </div>
-        ${canEdit ? `<button onclick="deletePlace(${p.placeID})" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:1.2rem;">🗑️</button>` : ''}
+        ${canEdit ? `<button onclick="deletePlace(${p.placeID})" style="background:none; border:none; color:#ff4444; cursor:pointer; font-size:1.2rem;">🗑️</button>` : ''}
       </div>`).join("");
   }
   el.innerHTML = html;
 }
 
 function switchToMapForAdd() {
-  const mapBtn = document.querySelector('.tab-btn[onclick*="\'map\'"]');
-  if (mapBtn) switchTab('map', mapBtn);
+  const btn = document.querySelector('button[onclick*="\'map\'"]');
+  switchTab('map', btn);
   document.getElementById('add-place-form').classList.add('active');
 }
 
 async function deletePlace(placeID) {
-  if (!confirm("ลบสถานที่นี้?")) return;
-  try {
-    await fetch(`/api/places/${placeID}`, {
-      method: 'DELETE',
-      credentials: 'include' // ✅
-    });
+  if (confirm("ลบสถานที่นี้?")) {
+    await fetch(`/api/places/${placeID}`, { method: 'DELETE' });
     loadChecklistData();
-  } catch (err) { console.error(err); }
+  }
 }
-
-// ─── Map ──────────────────────────────────────────────────────────────────────
 
 function getCurrentLocation() {
   if (!navigator.geolocation) return alert("ไม่รองรับการดึงตำแหน่ง");
-  document.getElementById('new-place-name').value = "กำลังดึงพิกัด...";
+  const nameInput = document.getElementById('new-place-name');
+  nameInput.value = "กำลังดึงพิกัด...";
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude: lat, longitude: lng } = pos.coords;
     mapInstance.setView([lat, lng], 16);
     updateTempMarker(lat, lng);
     await fetchAddress(lat, lng);
-  }, () => alert("ดึงตำแหน่งไม่สำเร็จ"));
+  }, (err) => alert("ดึงตำแหน่งไม่สำเร็จ"));
 }
 
 async function fetchAddress(lat, lng) {
+  const nameInput = document.getElementById('new-place-name');
   document.getElementById('new-place-lat').value = lat;
   document.getElementById('new-place-lng').value = lng;
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=th`);
     const data = await res.json();
-    if (data?.display_name) {
+    if (data && data.display_name) {
       currentFullAddress = data.display_name;
-      document.getElementById('new-place-name').value = data.name || data.display_name.split(',')[0];
+      nameInput.value = data.name || data.display_name.split(',')[0];
     }
   } catch (e) { currentFullAddress = "ไม่พบที่อยู่"; }
 }
@@ -546,16 +576,15 @@ function initOrUpdateMap() {
   if (!mapInstance) {
     mapInstance = L.map("map-container").setView([13.75, 100.5], 10);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapInstance);
-    L.Control.geocoder({ defaultMarkGeocode: false, placeholder: "🔍 ค้นหา..." })
-      .on('markgeocode', function(e) {
-        const { center, name } = e.geocode;
-        mapInstance.setView(center, 16);
-        updateTempMarker(center.lat, center.lng);
-        document.getElementById('new-place-name').value = name.split(',')[0];
-        currentFullAddress = name;
-        document.getElementById('new-place-lat').value = center.lat;
-        document.getElementById('new-place-lng').value = center.lng;
-      }).addTo(mapInstance);
+    L.Control.geocoder({ defaultMarkGeocode: false, placeholder: "🔍 ค้นหา..." }).on('markgeocode', function(e) {
+      const { center, name } = e.geocode;
+      mapInstance.setView(center, 16);
+      updateTempMarker(center.lat, center.lng);
+      document.getElementById('new-place-name').value = name.split(',')[0];
+      currentFullAddress = name;
+      document.getElementById('new-place-lat').value = center.lat;
+      document.getElementById('new-place-lng').value = center.lng;
+    }).addTo(mapInstance);
     mapInstance.on('click', async (e) => {
       updateTempMarker(e.latlng.lat, e.latlng.lng);
       await fetchAddress(e.latlng.lat, e.latlng.lng);
@@ -579,34 +608,18 @@ function updateMapMarkers() {
 }
 
 async function saveNewPlace() {
-  const name = document.getElementById('new-place-name').value.trim();
+  const name = document.getElementById('new-place-name').value;
   if (!name) return alert("กรุณาใส่ชื่อสถานที่");
-  const payload = {
-    checklistID,
-    placeName: name,
-    address: currentFullAddress,
-    latitude: document.getElementById('new-place-lat').value,
-    longitude: document.getElementById('new-place-lng').value
-  };
-  try {
-    const res = await fetch('/api/places', {
-      method: 'POST',
-      credentials: 'include', // ✅
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) { cancelAddPlace(); loadChecklistData(); }
-    else alert("บันทึกสถานที่ไม่สำเร็จ");
-  } catch (err) { console.error(err); }
+  const payload = { checklistID, placeName: name, address: currentFullAddress, latitude: document.getElementById('new-place-lat').value, longitude: document.getElementById('new-place-lng').value };
+  const res = await fetch('/api/places', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  if (res.ok) { cancelAddPlace(); loadChecklistData(); }
 }
 
 function cancelAddPlace() {
   document.getElementById('add-place-form').classList.remove('active');
   document.getElementById('new-place-name').value = "";
-  if (tempNewMarker) { mapInstance.removeLayer(tempNewMarker); tempNewMarker = null; }
+  if (tempNewMarker) mapInstance.removeLayer(tempNewMarker);
 }
-
-// ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 function switchTab(name, btn) {
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -616,28 +629,39 @@ function switchTab(name, btn) {
   if (name === "map") setTimeout(() => { initOrUpdateMap(); mapInstance.invalidateSize(); }, 150);
 }
 
-// ─── Copy checklist ───────────────────────────────────────────────────────────
-
 async function copyChecklistToMyMine() {
-  if (!checklistID) return;
-  if (!confirm('คุณต้องการคัดลอก Checklist นี้ไปเป็นของคุณใช่หรือไม่?')) return;
-  try {
-    const res = await fetch(`/api/checklists/${checklistID}/copy`, {
-      method: 'POST',
-      credentials: 'include', // ✅
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await res.json();
-    if (result.success) {
-      alert('คัดลอกสำเร็จ! กำลังพาคุณไปที่หน้า Checklist ของคุณ');
-      window.location.href = 'my-checklists.html';
-    } else {
-      alert('เกิดข้อผิดพลาด: ' + result.message);
+    if (!checklistID) return;
+
+    if (confirm('คุณต้องการคัดลอก Checklist นี้ไปเป็นของคุณใช่หรือไม่?')) {
+        try {
+            const res = await fetch(`/api/checklists/${checklistID}/copy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                alert('คัดลอกสำเร็จ! กำลังพาคุณไปที่หน้า Checklist ของคุณ');
+                window.location.href = 'my-checklists.html'; // ส่งไปหน้าจัดการส่วนตัว
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('ไม่สามารถเชื่อมต่อ Server ได้');
+        }
     }
-  } catch (err) {
-    console.error(err);
-    alert('ไม่สามารถเชื่อมต่อ Server ได้');
-  }
+}
+
+// ในฟังก์ชันที่ใช้ render หน้าจอ (เช่นตอนโหลดข้อมูลเสร็จ)
+const role = localStorage.getItem('role');
+if (role === 'admin') {
+    // ซ่อนส่วนที่ใช้เพิ่มไอเทม (ปรับ Selector ให้ตรงกับของคุณ เช่น .input-group)
+    const inputSection = document.querySelector('.item-input-container'); 
+    if (inputSection) inputSection.style.display = 'none';
+    
+    // ซ่อนปุ่มถังขยะ (ลบ)
+    document.querySelectorAll('.btn-delete-item').forEach(btn => btn.style.display = 'none');
 }
 </script>
 </body>

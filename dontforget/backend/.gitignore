@@ -2,3 +2,4 @@
 dontforget/backend/.env
 node_modules/
 upload/
+cloudinary/

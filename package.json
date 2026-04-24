@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "express-mysql-session": "^3.0.3"
+    "cloudinary": "^1.41.3",
+    "express-mysql-session": "^3.0.3",
+    "multer-storage-cloudinary": "^4.0.0"
   }
 }
