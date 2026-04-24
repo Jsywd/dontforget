@@ -74,70 +74,58 @@ function getSidebarContent(isAdmin) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const isAdmin = localStorage.getItem('isAdmin') === 'true';
   const target = document.getElementById('sidebar-mount');
+  if (!target) return;
 
-  // 1. วาดโครง Sidebar (ใช้ฟังก์ชันเดิมเพื่อแยก Role แอดมิน/ยูสเซอร์)
-  if (target) {
-    target.innerHTML = getSidebarContent(isAdmin);
+  // ดึงข้อมูล user จาก server แทน localStorage
+  let isAdmin = false;
+  let user = null;
+
+  try {
+    const res = await fetch('/auth/me', { credentials: 'include' });
+    const data = await res.json();
+    if (data.loggedIn) {
+      user = data.user;
+      isAdmin = data.user.role === 'admin';
+    }
+  } catch (e) {}
+
+  target.innerHTML = getSidebarContent(isAdmin);
+
+  // แสดงข้อมูล user ใน sidebar
+  if (user) {
+    const nameEl = document.querySelector('.user-name');
+    const emailEl = document.querySelector('.user-email');
+    const avatarEl = document.querySelector('.user-avatar');
+    if (nameEl) nameEl.textContent = user.username;
+    if (emailEl) emailEl.textContent = user.email;
+    if (avatarEl) {
+      if (user.avatar) avatarEl.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+      else avatarEl.textContent = (user.username || 'U').substring(0, 2).toUpperCase();
+    }
   }
 
-  // 2. โหลดหมวดหมู่เข้า Sidebar (เฉพาะ User ตามที่คุณต้องการ)
+  // โหลดหมวดหมู่
   if (!isAdmin) {
     try {
       const res = await fetch('/api/categories', { credentials: 'include' });
       const data = await res.json();
       const nav = document.getElementById('sidebar-categories');
-
       if (nav && data.success) {
-        // 🚩 แก้ไข href ตรงนี้เพื่อให้ส่งค่าไปหน้า Dashboard ได้ถูกต้อง
         nav.innerHTML = data.data.map(c => `
-  <a href="/pages/community.html?categoryID=${c.categoryID}">
-    <span class="icon">${c.icon || '📂'}</span> ${c.categoryName}
-  </a>
-`).join('');
+          <a href="/pages/community.html?categoryID=${c.categoryID}">
+            <span class="icon">${c.icon || '📂'}</span> ${c.categoryName}
+          </a>
+        `).join('');
       }
-    } catch (e) {
-      console.error("โหลดหมวดหมู่ไม่สำเร็จ:", e);
-    }
+    } catch (e) {}
   }
 
-  // 3. ผูกฟังก์ชัน Logout (ถ้ามี)
+  // logout
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-        if(confirm('ออกจากระบบใช่ไหม?')) logout();
+      if (confirm('ออกจากระบบใช่ไหม?')) logout();
     });
   }
 });
-
-// ฟังก์ชันโหลดหมวดหมู่
-async function loadSidebarCategories() {
-    const container = document.getElementById('sidebar-categories');
-    if (!container) return;
-
-    try {
-        const res = await API.get('/api/categories');
-        // ตรวจสอบโครงสร้าง res (บางทีอาจเป็น {success: true, data: []})
-        const categories = Array.isArray(res) ? res : (res.data || []);
-        
-        container.innerHTML = categories.map(cat => `
-    <a href="/pages/dashboard.html?category=${cat.categoryID}">
-        <span class="icon">📁</span> ${cat.categoryName}
-    </a>
-`).join('');
-    } catch (err) {
-        console.error("Failed to load categories", err);
-    }
-}
-
-// ฟังก์ชันพิเศษสำหรับ Admin (ดึงข้อมูลจาก LocalStorage มาโชว์)
-function renderAdminChip() {
-    const adminData = JSON.parse(localStorage.getItem('user'));
-    if (adminData) {
-        const nameEl = document.querySelector('.user-name');
-        const emailEl = document.querySelector('.user-email');
-        if (nameEl) nameEl.textContent = adminData.username || 'Admin Staff';
-        if (emailEl) emailEl.textContent = adminData.email || 'admin@gmail.com';
-    }
-}
