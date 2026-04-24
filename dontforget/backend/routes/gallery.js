@@ -53,13 +53,27 @@ router.get('/:checklistID', async (req, res) => {
   }
 });
 
-// DELETE: ลบรูป
+// DELETE: ลบรูปใน Gallery
 router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
-    // หมายเหตุ: การลบตรงนี้จะลบแค่ "ชื่อ URL" ใน Database 
-    // หากต้องการลบไฟล์ออกจาก Cloudinary จริงๆ ต้องใช้ cloudinary.uploader.destroy เพิ่มเติม
-    await db.query('DELETE FROM checklist_gallery WHERE imageID = ?', [req.params.id]);
-    res.json({ success: true, message: 'ลบข้อมูลรูปภาพออกจากระบบแล้ว' });
+    const imageID = req.params.id;
+
+    // 1. เช็คก่อนว่ารูปนี้เป็นของ User คนที่ล็อกอินอยู่จริงไหม (Join กับตาราง checklists)
+    const [imageData] = await db.query(
+      `SELECT g.* FROM checklist_gallery g
+       JOIN checklists c ON g.checklistID = c.checklistID
+       WHERE g.imageID = ? AND c.userID = ?`,
+      [imageID, req.user.userID]
+    );
+
+    if (imageData.length === 0) {
+      return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ลบรูปนี้' });
+    }
+
+    // 2. ลบข้อมูลใน TiDB
+    await db.query('DELETE FROM checklist_gallery WHERE imageID = ?', [imageID]);
+
+    res.json({ success: true, message: 'ลบรูปสำเร็จ' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

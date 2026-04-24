@@ -361,6 +361,8 @@ async function uploadToGallery() {
 }
 
 // 6. ดึงรูปที่อัพโหลดแล้วมาโชว์
+// ไฟล์: pages/checklist-detail.html
+
 async function loadGalleryData() {
   try {
     const res = await fetch(`/api/checklist-gallery/${checklistID}`);
@@ -372,23 +374,38 @@ async function loadGalleryData() {
       return;
     }
 
+    // แก้ไขบรรทัดนี้: ตรวจสอบ img.imageID (ต้องเป็น ID ใหญ่) และ img.imageUrl
     galleryList.innerHTML = result.data.map(img => `
       <div class="gallery-card">
         <button class="btn-delete-img" onclick="deleteGalleryImage(${img.imageID})">✕</button>
         <img src="${img.imageUrl}" onclick="window.open('${img.imageUrl}')">
-        ${img.caption ? `<div class="caption">${img.caption}</div>` : ''}
       </div>
     `).join("");
-  } catch (e) { console.error("Load gallery error", e); }
+
+  } catch (e) { 
+    console.error("Load gallery error", e); 
+  }
 }
 
 async function deleteGalleryImage(imageID) {
   if (!confirm("ลบรูปนี้ใช่ไหม?")) return;
-  const res = await fetch(`/api/items/${itemID}`, { 
-  method: 'DELETE',
-  credentials: 'include'         // ← เพิ่ม
-});
-  if (res.ok) loadGalleryData();
+  
+  try {
+    const res = await fetch(`/api/checklist-gallery/${imageID}`, { // ✅ แก้ Path ให้ตรงกับ Gallery
+      method: 'DELETE',
+      credentials: 'include' 
+    });
+    
+    const result = await res.json();
+    if (result.success) {
+      loadGalleryData(); // โหลดรูปใหม่ทันทีหลังลบสำเร็จ
+    } else {
+      alert("ลบไม่สำเร็จ: " + result.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+  }
 }
 
 // --- FUNCTIONS อื่นๆ (Items, Places, Map) ---
