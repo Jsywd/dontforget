@@ -172,6 +172,23 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .user-chip {
   display: flex;
   align-items: center;
@@ -232,7 +249,7 @@ body {
 .main-content {
   margin-left: 220px; /* เว้นที่ให้ Sidebar ที่เป็น Fixed */
   flex: 1;
-  height: 100%; /* สูงเต็ม 100% ของ .app-layout */
+  height: 100vh; /* สูงเต็ม 100% ของ .app-layout */
   overflow-y: auto; /* ให้ Scroll ได้เฉพาะส่วนนี้ */
   padding: 32px;
   background: var(--bg-primary); /* หรือสีที่คุณต้องการให้เต็มจอ */
