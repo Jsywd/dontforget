@@ -217,6 +217,10 @@ function hideActionsForAdmin() {
 }
 
 function renderHeader() {
+  // ลบ descBox เก่าออกก่อนทุกครั้ง
+  const oldDesc = document.getElementById('desc-box');
+  if (oldDesc) oldDesc.remove();
+
   const role = localStorage.getItem('role');
   const isOwner = checklist.isOwner;
 
@@ -226,7 +230,6 @@ function renderHeader() {
     </button>
   `;
 
-  // header หลัก
   document.getElementById("detail-header").innerHTML = `
     <div class="detail-cover">✅</div>
     <div class="detail-info">
@@ -238,9 +241,9 @@ function renderHeader() {
     ${copyButtonHTML}
   `;
 
-  // box คำอธิบาย แยกด้านล่าง
   if (checklist.description) {
     const descBox = document.createElement('div');
+    descBox.id = 'desc-box'; // ← เพิ่ม id
     descBox.style.cssText = `
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -255,7 +258,6 @@ function renderHeader() {
       <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">📝 คำอธิบาย</div>
       ${checklist.description}
     `;
-    // แทรกหลัง detail-header และก่อน tabs
     const header = document.getElementById('detail-header');
     header.insertAdjacentElement('afterend', descBox);
   }
