@@ -76,6 +76,16 @@ html, body {
   height: 100vh;
   z-index: 100;
   transition: transform 0.3s ease;
+  overflow-y: auto; /* ← เพิ่มบรรทัดนี้ */
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+  position: sticky; /* ← เพิ่ม */
+  bottom: 0;        /* ← เพิ่ม */
+  background: var(--bg-secondary); /* ← เพิ่ม ให้บังเนื้อหาด้านบน */
 }
 
 .sidebar-logo {
