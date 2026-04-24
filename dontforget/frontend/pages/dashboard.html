@@ -113,7 +113,7 @@
     <main class="main-content">
       <!-- Greeting -->
       <div class="greeting">
-        <h2 id="greeting-text">สวัสดีจ้าาาาา 👋</h2>
+        <h2 id="greeting-text">สวัสดี 👋</h2>
         <p id="greeting-sub">แนะนำสำหรับคุณวันนี้</p>
       </div>
 
@@ -164,7 +164,7 @@
     const user = await loadAuth();
     if (!user) return;
 
-    document.getElementById('greeting-text').textContent = `สวัสดี ${user.username} 👋`;
+    document.getElementById('greeting-text').textContent = `สวัสดีจ้า ${user.username} 👋`;
 
     const urlParams = new URLSearchParams(window.location.search);
     const categoryId = urlParams.get('category');
