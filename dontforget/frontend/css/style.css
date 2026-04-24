@@ -1,5 +1,5 @@
 /* frontend/css/style.css */
-@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap");
 
 :root {
   --bg-primary: #0d0d0d;
@@ -17,32 +17,46 @@
   --border-light: #333;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  font-family: 'Sarabun', sans-serif;
+  font-family: "Sarabun", sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
 }
 
-h1, h2, h3, h4 { font-family: 'Prompt', sans-serif; }
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Prompt", sans-serif;
+}
 
-a { color: inherit; text-decoration: none; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
 button {
-  font-family: 'Sarabun', sans-serif;
+  font-family: "Sarabun", sans-serif;
   cursor: pointer;
   border: none;
   outline: none;
 }
 
-input, textarea, select {
-  font-family: 'Sarabun', sans-serif;
+input,
+textarea,
+select {
+  font-family: "Sarabun", sans-serif;
   outline: none;
   border: none;
 }
@@ -50,7 +64,8 @@ input, textarea, select {
 /* ─── Layout ─────────────────────────────────────────────── */
 /* --- แก้ไขส่วน Layout --- */
 /* บังคับให้โครงสร้างภายนอกสุดสูงเท่าจอพอดี */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   overflow: hidden; /* ห้ามเกิด scrollbar ที่ตัวบอดี้หลัก */
@@ -59,7 +74,7 @@ html, body {
 .app-layout {
   display: flex;
   width: 100vw;
-  height: 100vh;    /* บังคับสูง 100% ของ Viewport */
+  height: 100vh; /* บังคับสูง 100% ของ Viewport */
   background: var(--bg-primary);
 }
 
@@ -72,7 +87,8 @@ html, body {
   flex-direction: column;
   padding: 20px 0;
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   height: 100vh;
   z-index: 100;
   transition: transform 0.3s ease;
@@ -95,7 +111,7 @@ html, body {
 }
 
 .sidebar-logo a {
-  font-family: 'Prompt', sans-serif;
+  font-family: "Prompt", sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -104,7 +120,9 @@ html, body {
   gap: 8px;
 }
 
-.sidebar-logo span { color: var(--accent); }
+.sidebar-logo span {
+  color: var(--accent);
+}
 
 .sidebar-section {
   padding: 0 12px;
@@ -142,7 +160,11 @@ html, body {
   color: var(--accent);
 }
 
-.sidebar-nav a .icon { font-size: 1rem; width: 20px; text-align: center; }
+.sidebar-nav a .icon {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+}
 
 .sidebar-bottom {
   margin-top: auto;
@@ -161,13 +183,18 @@ html, body {
   transition: background 0.2s;
 }
 
-.user-chip:hover { background: var(--bg-hover); }
+.user-chip:hover {
+  background: var(--bg-hover);
+}
 
 .user-avatar {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.8rem;
   font-weight: 700;
   color: #000;
@@ -175,19 +202,38 @@ html, body {
   flex-shrink: 0;
 }
 
-.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-.user-info { flex: 1; min-width: 0; }
-.user-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-email { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-email {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* ─── Main content ───────────────────────────────────────── */
 /* --- แก้ไขส่วน Main Content --- */
 .main-content {
   margin-left: 220px; /* เว้นที่ให้ Sidebar ที่เป็น Fixed */
   flex: 1;
-  height: 100%;       /* สูงเต็ม 100% ของ .app-layout */
-  overflow-y: auto;   /* ให้ Scroll ได้เฉพาะส่วนนี้ */
+  height: 100%; /* สูงเต็ม 100% ของ .app-layout */
+  overflow-y: auto; /* ให้ Scroll ได้เฉพาะส่วนนี้ */
   padding: 32px;
   background: var(--bg-primary); /* หรือสีที่คุณต้องการให้เต็มจอ */
   display: flex;
@@ -217,7 +263,10 @@ html, body {
   gap: 16px;
 }
 
-.page-title { font-size: 1.6rem; font-weight: 700; }
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
 
 /* ─── Search ─────────────────────────────────────────────── */
 .search-bar {
@@ -239,7 +288,9 @@ html, body {
   flex: 1;
 }
 
-.search-bar input::placeholder { color: var(--text-muted); }
+.search-bar input::placeholder {
+  color: var(--text-muted);
+}
 
 /* ─── Buttons ────────────────────────────────────────────── */
 .btn {
@@ -271,7 +322,9 @@ html, body {
   border: 1px solid var(--border);
 }
 
-.btn-secondary:hover { background: var(--bg-hover); }
+.btn-secondary:hover {
+  background: var(--bg-hover);
+}
 
 .btn-danger {
   background: transparent;
@@ -279,14 +332,19 @@ html, body {
   border: 1px solid var(--red);
 }
 
-.btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
 
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
 }
 
-.btn-ghost:hover { color: var(--text-primary); background: var(--bg-hover); }
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
 
 /* ─── Cards ──────────────────────────────────────────────── */
 .card {
@@ -304,9 +362,21 @@ html, body {
 }
 
 /* ─── Grid ───────────────────────────────────────────────── */
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
 
 /* ─── Category badge ─────────────────────────────────────── */
 .badge {
@@ -321,15 +391,21 @@ html, body {
   color: var(--text-secondary);
 }
 
-.badge-green { background: var(--accent-glow); color: var(--accent); }
-.badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-green {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+.badge-blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
 
 /* ─── Modal ──────────────────────────────────────────────── */
 .modal {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   align-items: center;
   justify-content: center;
@@ -340,15 +416,22 @@ html, body {
 }
 
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);  /* ← ตรงนี้คือพื้นหลังมืด */
-  display: flex; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7); /* ← ตรงนี้คือพื้นหลังมืด */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1000;
-  opacity: 0; pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
   transition: opacity 0.2s;
 }
 
-.modal-overlay.show { opacity: 1; pointer-events: all; }
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
 
 .modal-content {
   background: var(--bg-card);
@@ -359,7 +442,9 @@ html, body {
   max-width: 400px;
 }
 
-.modal-overlay.show .modal { transform: scale(1); }
+.modal-overlay.show .modal {
+  transform: scale(1);
+}
 
 .modal-header {
   display: flex;
@@ -368,24 +453,41 @@ html, body {
   margin-bottom: 20px;
 }
 
-.modal-title { font-size: 1.1rem; font-weight: 700; }
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
 
 .modal-close {
   background: var(--bg-hover);
   border-radius: 50%;
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 1.1rem;
   transition: all 0.2s;
 }
 
-.modal-close:hover { background: var(--red); color: #fff; }
+.modal-close:hover {
+  background: var(--red);
+  color: #fff;
+}
 
 /* ─── Form ───────────────────────────────────────────────── */
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+}
 
 .form-input {
   width: 100%;
@@ -398,15 +500,23 @@ html, body {
   transition: border-color 0.2s;
 }
 
-.form-input:focus { border-color: var(--accent); }
-.form-input::placeholder { color: var(--text-muted); }
+.form-input:focus {
+  border-color: var(--accent);
+}
+.form-input::placeholder {
+  color: var(--text-muted);
+}
 
-textarea.form-input { resize: vertical; min-height: 80px; }
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+}
 
 /* ─── Toast ──────────────────────────────────────────────── */
 .toast-container {
   position: fixed;
-  bottom: 24px; right: 24px;
+  bottom: 24px;
+  right: 24px;
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -427,27 +537,44 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   min-width: 250px;
 }
 
-.toast.success { border-left: 3px solid var(--accent); }
-.toast.error { border-left: 3px solid var(--red); }
+.toast.success {
+  border-left: 3px solid var(--accent);
+}
+.toast.error {
+  border-left: 3px solid var(--red);
+}
 
 @keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* ─── Loading ────────────────────────────────────────────── */
 .spinner {
-  width: 20px; height: 20px;
+  width: 20px;
+  height: 20px;
   border: 2px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .loading-state {
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 48px;
   color: var(--text-muted);
   flex-direction: column;
@@ -460,8 +587,14 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   color: var(--text-muted);
 }
 
-.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
-.empty-state h3 { color: var(--text-secondary); margin-bottom: 8px; }
+.empty-state .empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+.empty-state h3 {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
 
 /* ─── Progress ───────────────────────────────────────────── */
 .progress-bar {
@@ -480,11 +613,23 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 
 /* ─── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
-  .main-content { margin-left: 0; padding: 16px; }
-  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .grid-2 { grid-template-columns: 1fr; }
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 16px;
+  }
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .logout-btn {

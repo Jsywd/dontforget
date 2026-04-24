@@ -73,8 +73,8 @@ function getSidebarContent(isAdmin) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const target = document.getElementById('sidebar-mount');
+document.addEventListener("DOMContentLoaded", async () => {
+  const target = document.getElementById("sidebar-mount");
   if (!target) return;
 
   // ดึงข้อมูล user จาก server แทน localStorage
@@ -82,11 +82,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   let user = null;
 
   try {
-    const res = await fetch('/auth/me', { credentials: 'include' });
+    const res = await fetch("/auth/me", { credentials: "include" });
     const data = await res.json();
     if (data.loggedIn) {
       user = data.user;
-      isAdmin = data.user.role === 'admin';
+      isAdmin = data.user.role === "admin";
     }
   } catch (e) {}
 
@@ -94,38 +94,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // แสดงข้อมูล user ใน sidebar
   if (user) {
-    const nameEl = document.querySelector('.user-name');
-    const emailEl = document.querySelector('.user-email');
-    const avatarEl = document.querySelector('.user-avatar');
+    const nameEl = document.querySelector(".user-name");
+    const emailEl = document.querySelector(".user-email");
+    const avatarEl = document.querySelector(".user-avatar");
     if (nameEl) nameEl.textContent = user.username;
     if (emailEl) emailEl.textContent = user.email;
     if (avatarEl) {
-      if (user.avatar) avatarEl.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
-      else avatarEl.textContent = (user.username || 'U').substring(0, 2).toUpperCase();
+      if (user.avatar)
+        avatarEl.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+      else
+        avatarEl.textContent = (user.username || "U")
+          .substring(0, 2)
+          .toUpperCase();
     }
   }
 
   // โหลดหมวดหมู่
   if (!isAdmin) {
     try {
-      const res = await fetch('/api/categories', { credentials: 'include' });
+      const res = await fetch("/api/categories", { credentials: "include" });
       const data = await res.json();
-      const nav = document.getElementById('sidebar-categories');
+      const nav = document.getElementById("sidebar-categories");
       if (nav && data.success) {
-        nav.innerHTML = data.data.map(c => `
+        nav.innerHTML = data.data
+          .map(
+            (c) => `
           <a href="/pages/community.html?categoryID=${c.categoryID}">
-            <span class="icon">${c.icon || '📂'}</span> ${c.categoryName}
+            <span class="icon">${c.icon || "📂"}</span> ${c.categoryName}
           </a>
-        `).join('');
+        `,
+          )
+          .join("");
       }
     } catch (e) {}
   }
 
   // logout
-  const logoutBtn = document.getElementById('logout-btn');
+  const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      if (confirm('ออกจากระบบใช่ไหม?')) logout();
+    logoutBtn.addEventListener("click", () => {
+      if (confirm("ออกจากระบบใช่ไหม?")) logout();
     });
   }
 });

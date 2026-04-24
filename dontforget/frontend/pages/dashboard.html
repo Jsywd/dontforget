@@ -1,201 +1,309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แดชบอร์ด — Don't Forget</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <style>
-    .greeting { margin-bottom: 28px; }
-    .greeting h2 { font-size: 1.6rem; font-weight: 700; }
-    .greeting p { color: var(--text-secondary); margin-top: 4px; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>แดชบอร์ด — Don't Forget</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      .greeting {
+        margin-bottom: 28px;
+      }
+      .greeting h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .greeting p {
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
 
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-    }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
 
-    .section-title { font-size: 1rem; font-weight: 700; }
+      .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+      }
 
-    /* Recommended cards */
-    .rec-cards { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; }
-    .rec-cards::-webkit-scrollbar { height: 4px; }
-    .rec-cards::-webkit-scrollbar-track { background: var(--bg-secondary); }
-    .rec-cards::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+      /* Recommended cards */
+      .rec-cards {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      .rec-cards::-webkit-scrollbar {
+        height: 4px;
+      }
+      .rec-cards::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+      }
+      .rec-cards::-webkit-scrollbar-thumb {
+        background: var(--border-light);
+        border-radius: 2px;
+      }
 
-    .rec-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      min-width: 240px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
+      .rec-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        min-width: 240px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
 
-    .rec-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .rec-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
 
-    .rec-card-cover {
-      height: 100px;
-      background: linear-gradient(135deg, #1e3a2f, #0d2818);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
+      .rec-card-cover {
+        height: 100px;
+        background: linear-gradient(135deg, #1e3a2f, #0d2818);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
 
-    .rec-card-cover img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+      .rec-card-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+      }
 
-    .rec-card-body { padding: 14px; }
-    .rec-card-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-    .rec-card-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+      .rec-card-body {
+        padding: 14px;
+      }
+      .rec-card-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+      }
+      .rec-card-meta {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-    .rec-card-footer {
-      padding: 10px 14px;
-      border-top: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
+      .rec-card-footer {
+        padding: 10px 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-    /* Popular list */
-    .popular-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+      /* Popular list */
+      .popular-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-    .popular-item:hover { border-color: var(--border-light); transform: translateX(4px); }
+      .popular-item:hover {
+        border-color: var(--border-light);
+        transform: translateX(4px);
+      }
 
-    .popular-rank {
-      width: 28px; height: 28px;
-      background: var(--bg-secondary);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
+      .popular-rank {
+        width: 28px;
+        height: 28px;
+        background: var(--bg-secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
 
-    .popular-rank.top { background: var(--accent-glow); color: var(--accent); }
+      .popular-rank.top {
+        background: var(--accent-glow);
+        color: var(--accent);
+      }
 
-    .popular-info { flex: 1; min-width: 0; }
-    .popular-title { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .popular-author { font-size: 0.75rem; color: var(--text-muted); }
-    .popular-copies { font-size: 0.8rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
+      .popular-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .popular-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .popular-author {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .popular-copies {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--accent);
+        white-space: nowrap;
+      }
 
-    /* Quick stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+      /* Quick stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 32px;
+      }
 
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      text-align: center;
-    }
+      .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        text-align: center;
+      }
 
-    .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-  </style>
-</head>
-<body>
-  <div class="app-layout">
-    <div id="sidebar-mount"></div>
+      .stat-number {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-layout">
+      <div id="sidebar-mount"></div>
 
-    <main class="main-content">
-      <!-- Greeting -->
-      <div class="greeting">
-        <h2 id="greeting-text">สวัสดี 👋</h2>
-        <p id="greeting-sub">แนะนำสำหรับคุณวันนี้</p>
-      </div>
-
-      <!-- Quick stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" id="stat-total">—</div>
-          <div class="stat-label">Checklist ทั้งหมด</div>
+      <main class="main-content">
+        <!-- Greeting -->
+        <div class="greeting">
+          <h2 id="greeting-text">สวัสดี 👋</h2>
+          <p id="greeting-sub">แนะนำสำหรับคุณวันนี้</p>
         </div>
-        <div class="stat-card">
-          <div class="stat-number" id="stat-done">—</div>
-          <div class="stat-label">เสร็จสิ้นแล้ว</div>
+
+        <!-- Quick stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="stat-total">—</div>
+            <div class="stat-label">Checklist ทั้งหมด</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="stat-done">—</div>
+            <div class="stat-label">เสร็จสิ้นแล้ว</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="stat-public">—</div>
+            <div class="stat-label">สาธารณะ</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number" id="stat-public">—</div>
-          <div class="stat-label">สาธารณะ</div>
+
+        <!-- Recommended -->
+        <div style="margin-bottom: 32px">
+          <div class="section-header">
+            <div class="section-title">🎯 แนะนำสำหรับคุณ</div>
+            <a
+              href="/pages/community.html"
+              class="btn btn-ghost"
+              style="font-size: 0.8rem"
+              >ดูทั้งหมด →</a
+            >
+          </div>
+          <div class="rec-cards" id="rec-cards">
+            <div class="loading-state"><div class="spinner"></div></div>
+          </div>
         </div>
-      </div>
 
-      <!-- Recommended -->
-      <div style="margin-bottom: 32px;">
-        <div class="section-header">
-          <div class="section-title">🎯 แนะนำสำหรับคุณ</div>
-          <a href="/pages/community.html" class="btn btn-ghost" style="font-size:0.8rem;">ดูทั้งหมด →</a>
+        <!-- Popular -->
+        <div>
+          <div class="section-header">
+            <div class="section-title">🔥 Checklist ยอดนิยม</div>
+            <a
+              href="/pages/community.html"
+              class="btn btn-ghost"
+              style="font-size: 0.8rem"
+              >ดูทั้งหมด →</a
+            >
+          </div>
+          <div id="popular-list">
+            <div class="loading-state"><div class="spinner"></div></div>
+          </div>
         </div>
-        <div class="rec-cards" id="rec-cards">
-          <div class="loading-state"><div class="spinner"></div></div>
-        </div>
-      </div>
+      </main>
+    </div>
 
-      <!-- Popular -->
-      <div>
-        <div class="section-header">
-          <div class="section-title">🔥 Checklist ยอดนิยม</div>
-          <a href="/pages/community.html" class="btn btn-ghost" style="font-size:0.8rem;">ดูทั้งหมด →</a>
-        </div>
-        <div id="popular-list">
-          <div class="loading-state"><div class="spinner"></div></div>
-        </div>
-      </div>
-    </main>
-  </div>
+    <script src="/js/app.js"></script>
+    <script src="/js/sidebar.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const user = await loadAuth();
+        if (!user) return;
 
-  <script src="/js/app.js"></script>
-  <script src="/js/sidebar.js"></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const user = await loadAuth();
-    if (!user) return;
+        document.getElementById("greeting-text").textContent =
+          `สวัสดีจ้า ${user.username} 👋`;
 
-    document.getElementById('greeting-text').textContent = `สวัสดีจ้า ${user.username} 👋`;
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryId = urlParams.get("category");
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryId = urlParams.get('category');
+        // --- การจัดการ UI เมื่อมีการเลือกหมวดหมู่ ---
+        if (categoryId) {
+          document.getElementById("greeting-sub").textContent =
+            `กำลังแสดงเช็คลิสต์ในหมวดหมู่ที่คุณเลือก`;
+          document.querySelector(".stats-grid").style.display = "none";
 
-    // --- การจัดการ UI เมื่อมีการเลือกหมวดหมู่ ---
-    if (categoryId) {
-      document.getElementById('greeting-sub').textContent = `กำลังแสดงเช็คลิสต์ในหมวดหมู่ที่คุณเลือก`;
-      document.querySelector('.stats-grid').style.display = 'none';
-      
-      // ซ่อนส่วน "ยอดนิยม" เพื่อให้ผลการค้นหาเด่นชัด
-      const popularSection = document.getElementById('popular-list').closest('div');
-      if (popularSection) popularSection.style.display = 'none';
-    }
+          // ซ่อนส่วน "ยอดนิยม" เพื่อให้ผลการค้นหาเด่นชัด
+          const popularSection = document
+            .getElementById("popular-list")
+            .closest("div");
+          if (popularSection) popularSection.style.display = "none";
+        }
 
-    // โหลดสถิติ (Stats)
-    const myRes = await API.get('/api/checklists/my');
-    if (myRes && myRes.success) {
-      const all = myRes.data || [];
-      document.getElementById('stat-total').textContent = all.length;
-      document.getElementById('stat-public').textContent = all.filter(c => c.isPublic).length;
-      document.getElementById('stat-done').textContent = all.filter(c => c.itemCount > 0 && c.checkedCount === c.itemCount).length;
-    }
+        // โหลดสถิติ (Stats)
+        const myRes = await API.get("/api/checklists/my");
+        if (myRes && myRes.success) {
+          const all = myRes.data || [];
+          document.getElementById("stat-total").textContent = all.length;
+          document.getElementById("stat-public").textContent = all.filter(
+            (c) => c.isPublic,
+          ).length;
+          document.getElementById("stat-done").textContent = all.filter(
+            (c) => c.itemCount > 0 && c.checkedCount === c.itemCount,
+          ).length;
+        }
 
-    // --- โหลดข้อมูลแนะนำหรือหมวดหมู่ ---
-    // --- โหลดข้อมูลแนะนำหรือหมวดหมู่ ---
-    let recUrl = categoryId ? `/api/checklists?category=${categoryId}` : '/api/checklists/recommended';
+        // --- โหลดข้อมูลแนะนำหรือหมวดหมู่ ---
+        // --- โหลดข้อมูลแนะนำหรือหมวดหมู่ ---
+        let recUrl = categoryId
+          ? `/api/checklists?category=${categoryId}`
+          : "/api/checklists/recommended";
 
-    const renderCard = (c) => `
+        const renderCard = (c) => `
       <div class="rec-card" onclick="window.location.href='/pages/checklist-detail.html?id=${c.checklistID}'">
         <div class="rec-card-cover">
-          ${c.coverImage ? `<img src="${c.coverImage}" alt="">` : (c.icon || '📋')}
+          ${c.coverImage ? `<img src="${c.coverImage}" alt="">` : c.icon || "📋"}
         </div>
         <div class="rec-card-body">
           <div class="rec-card-title">${c.title}</div>
@@ -207,68 +315,73 @@
         </div>
         <div class="rec-card-footer">
           <span class="badge" style="background:${getCategoryColor(c.categoryName)}22;color:${getCategoryColor(c.categoryName)}">
-            ${c.icon || '📂'} ${c.categoryName || 'ทั่วไป'}
+            ${c.icon || "📂"} ${c.categoryName || "ทั่วไป"}
           </span>
           <span style="font-size:0.75rem;color:var(--text-muted)">${c.copyCount || 0} copies</span>
         </div>
       </div>
     `;
 
-    // โหลดพร้อมกันทั้งคู่
-    const [recRes, popRes] = await Promise.allSettled([
-      API.get(recUrl),
-      API.get('/api/checklists/popular')
-    ]);
+        // โหลดพร้อมกันทั้งคู่
+        const [recRes, popRes] = await Promise.allSettled([
+          API.get(recUrl),
+          API.get("/api/checklists/popular"),
+        ]);
 
-    const recEl = document.getElementById('rec-cards');
-    const recData = recRes.value?.data || [];
+        const recEl = document.getElementById("rec-cards");
+        const recData = recRes.value?.data || [];
 
-    // ถ้า recommended ว่าง → ใช้ popular แทน
-    const displayRec = recData.length > 0
-      ? recData
-      : (popRes.value?.data || []).slice(0, 5);
+        // ถ้า recommended ว่าง → ใช้ popular แทน
+        const displayRec =
+          recData.length > 0 ? recData : (popRes.value?.data || []).slice(0, 5);
 
-    if (displayRec.length > 0) {
-      recEl.innerHTML = displayRec.map(renderCard).join('');
-      if (categoryId && displayRec[0]?.categoryName) {
-        document.querySelector('.section-title').textContent = `📂 หมวดหมู่: ${displayRec[0].categoryName}`;
-      }
-    } else {
-      recEl.innerHTML = `
+        if (displayRec.length > 0) {
+          recEl.innerHTML = displayRec.map(renderCard).join("");
+          if (categoryId && displayRec[0]?.categoryName) {
+            document.querySelector(".section-title").textContent =
+              `📂 หมวดหมู่: ${displayRec[0].categoryName}`;
+          }
+        } else {
+          recEl.innerHTML = `
         <div class="empty-state" style="padding:40px;text-align:center;width:100%;">
           <div style="font-size:3rem;margin-bottom:10px;">🔍</div>
           <p style="color:var(--text-muted)">ไม่พบเช็คลิสต์ในหมวดหมู่นี้</p>
           <a href="/pages/community.html" style="color:var(--accent);text-decoration:none;">ดูทั้งหมด</a>
         </div>`;
-    }
+        }
 
-    // โหลด popular list
-    if (!categoryId) {
-      const popEl = document.getElementById('popular-list');
-      const popularData = popRes.value?.data || [];
+        // โหลด popular list
+        if (!categoryId) {
+          const popEl = document.getElementById("popular-list");
+          const popularData = popRes.value?.data || [];
 
-      if (popularData.length > 0) {
-        popEl.innerHTML = popularData.slice(0, 8).map((c, i) => `
+          if (popularData.length > 0) {
+            popEl.innerHTML = popularData
+              .slice(0, 8)
+              .map(
+                (c, i) => `
           <div class="popular-item" onclick="window.location.href='/pages/checklist-detail.html?id=${c.checklistID}'">
-            <div class="popular-rank ${i < 3 ? 'top' : ''}">${i + 1}</div>
+            <div class="popular-rank ${i < 3 ? "top" : ""}">${i + 1}</div>
             <div class="popular-info">
               <div class="popular-title">${c.title}</div>
               <div class="popular-author">@${c.username}</div>
             </div>
             <span class="badge" style="background:${getCategoryColor(c.categoryName)}22;color:${getCategoryColor(c.categoryName)}">
-              ${c.icon || '📂'} ${c.categoryName || 'ทั่วไป'}
+              ${c.icon || "📂"} ${c.categoryName || "ทั่วไป"}
             </span>
             <span class="popular-copies">${c.copyCount} copies</span>
           </div>
-        `).join('');
-      } else {
-        popEl.innerHTML = `
+        `,
+              )
+              .join("");
+          } else {
+            popEl.innerHTML = `
           <div class="empty-state" style="padding:40px;text-align:center;">
             <p style="color:var(--text-muted)">ยังไม่มี Checklist ยอดนิยม</p>
           </div>`;
-      }
-    }
-  });
-</script>
-</body>
+          }
+        }
+      });
+    </script>
+  </body>
 </html>
