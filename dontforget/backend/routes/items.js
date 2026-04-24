@@ -3,56 +3,46 @@ const express = require('express');
 const router  = express.Router();
 const db      = require('../config/db');
 const { isAuthenticated } = require('../middleware/auth');
-const multer  = require('multer');
-const path    = require('path');
- 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
-  filename:    (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, '_'))
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
- 
-// helper: ตรวจเจ้าของ checklist
+
+// ─── 1. เปลี่ยนการนำเข้าเป็น Cloudinary ─────────────────────────────────────────
+// ใช้ uploadCover หรือจะใช้ uploadGallery ก็ได้ตามความเหมาะสมของขนาดรูป
+const { uploadCover } = require('../config/cloudinary'); 
+
+// ❌ ลบ Multer Local Storage และ Path เดิมออก
+
+// helper: ตรวจเจ้าของ checklist (คงเดิม)
 async function verifyOwner(checklistID, userID) {
   const [rows] = await db.query('SELECT userID FROM checklists WHERE checklistID = ?', [checklistID]);
   return rows.length && rows[0].userID === userID;
 }
- 
-// ─── POST / — เพิ่ม Item ──────────────────────────────────────────────────────
-// Frontend เรียก: POST /api/items
-// Body: { checklistID, itemText }
+
+// ─── POST / — เพิ่ม Item (คงเดิมเพราะไม่มีอัปโหลดรูปในหน้านี้) ──────────────────────
 router.post('/', isAuthenticated, async (req, res) => {
   const { checklistID, itemText } = req.body;
- 
   if (!checklistID || !itemText?.trim()) {
     return res.status(400).json({ success: false, message: 'กรุณาระบุ checklistID และ itemText' });
   }
- 
   try {
     const isOwner = await verifyOwner(checklistID, req.user.userID);
     if (!isOwner) return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์' });
- 
-    // หา sortOrder ถัดไป
+
     const [[{ maxOrder }]] = await db.query(
       'SELECT COALESCE(MAX(sortOrder), 0) AS maxOrder FROM checklist_items WHERE checklistID = ?',
       [checklistID]
     );
- 
+
     const [result] = await db.query(
       'INSERT INTO checklist_items (checklistID, itemText, isChecked, sortOrder) VALUES (?, ?, 0, ?)',
       [checklistID, itemText.trim(), maxOrder + 1]
     );
- 
     res.json({ success: true, itemID: result.insertId });
   } catch (err) {
-    console.error('POST /api/items:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
-// ─── PUT /:id — แก้ไข Item ────────────────────────────────────────────────────
-// Body: { itemText } หรือ { isChecked } หรือ { sortOrder }
-router.put('/:id', isAuthenticated, upload.single('image'), async (req, res) => {
+
+// ─── 2. PUT /:id — แก้ไข Item (เปลี่ยนเป็น Cloudinary) ───────────────────────────
+router.put('/:id', isAuthenticated, uploadCover.single('image'), async (req, res) => {
   const { itemText, isChecked, sortOrder } = req.body;
   try {
     const [item] = await db.query(
@@ -63,27 +53,32 @@ router.put('/:id', isAuthenticated, upload.single('image'), async (req, res) => 
     );
     if (!item.length || item[0].userID !== req.user.userID)
       return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์' });
- 
+
     let sql = 'UPDATE checklist_items SET';
     const params = [];
     if (itemText  !== undefined) { sql += ' itemText=?,';  params.push(itemText); }
     if (isChecked !== undefined) { sql += ' isChecked=?,'; params.push(isChecked == '1' || isChecked === true ? 1 : 0); }
     if (sortOrder !== undefined) { sql += ' sortOrder=?,'; params.push(sortOrder); }
-    if (req.file)                { sql += ' imageURL=?,';  params.push(`/uploads/${req.file.filename}`); }
- 
+    
+    // ─── 3. เปลี่ยนการเก็บ path เป็น Cloudinary URL ─────────────────────────────
+    if (req.file) { 
+      sql += ' imageURL=?,';  
+      params.push(req.file.path); // ใช้ URL เต็มจาก Cloudinary
+    }
+
     if (params.length === 0) return res.json({ success: true });
- 
+
     sql = sql.replace(/,$/, '') + ' WHERE itemID=?';
     params.push(req.params.id);
- 
+
     await db.query(sql, params);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
-// ─── DELETE /:id — ลบ Item ───────────────────────────────────────────────────
+
+// ─── DELETE /:id — ลบ Item (คงเดิม) ───────────────────────────────────────────
 router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
     const [item] = await db.query(
@@ -94,12 +89,12 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     );
     if (!item.length || item[0].userID !== req.user.userID)
       return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์' });
- 
+
     await db.query('DELETE FROM checklist_items WHERE itemID = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
+
 module.exports = router;

@@ -3,16 +3,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 const { isAuthenticated } = require('../middleware/auth');
-const multer = require('multer');
-const path = require('path');
+
 
 // ─── Multer config for images ─────────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, '_'))
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
-
+const { uploadCover } = require('../config/cloudinary'); // เรียกใช้จากไฟล์คอนฟิกที่คุณสร้าง
 // ─── GET: My checklists ───────────────────────────────────────────────────────
 router.get('/my', isAuthenticated, async (req, res) => {
   try {
@@ -160,10 +154,13 @@ router.get('/:id', async (req, res) => {
 });
 
 // ─── POST: Create checklist ───────────────────────────────────────────────────
-router.post('/', isAuthenticated, upload.single('coverImage'), async (req, res) => {
+router.post('/', isAuthenticated, uploadCover.single('coverImage'), async (req, res) => {
   const { title, description, categoryID, isPublic } = req.body;
   if (!title) return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อ Checklist' });
-  const coverImage = req.file ? `/uploads/${req.file.filename}` : null;
+
+  // req.file.path จะเป็น URL ของ Cloudinary โดยตรง (เช่น https://res.cloudinary.com/...)
+  const coverImage = req.file ? req.file.path : null; 
+
   try {
     const [result] = await db.query(
       'INSERT INTO checklists (userID, title, description, categoryID, coverImage, isPublic) VALUES (?, ?, ?, ?, ?, ?)',
@@ -176,7 +173,9 @@ router.post('/', isAuthenticated, upload.single('coverImage'), async (req, res) 
 });
 
 // ─── PUT: Update checklist ────────────────────────────────────────────────────
-router.put('/:id', isAuthenticated, upload.single('coverImage'), async (req, res) => {
+// ─── PUT: Update checklist ────────────────────────────────────────────────────
+// เปลี่ยนเป็น uploadCover.single
+router.put('/:id', isAuthenticated, uploadCover.single('coverImage'), async (req, res) => {
   const { title, description, categoryID, isPublic } = req.body;
   try {
     const [cl] = await db.query('SELECT userID FROM checklists WHERE checklistID = ?', [req.params.id]);
@@ -185,7 +184,12 @@ router.put('/:id', isAuthenticated, upload.single('coverImage'), async (req, res
 
     let sql = 'UPDATE checklists SET title=?, description=?, categoryID=?, isPublic=?';
     const params = [title, description || null, categoryID || null, isPublic ? 1 : 0];
-    if (req.file) { sql += ', coverImage=?'; params.push(`/uploads/${req.file.filename}`); }
+
+    if (req.file) { 
+      sql += ', coverImage=?'; 
+      params.push(req.file.path); // ใช้ path (URL) จาก Cloudinary
+    }
+
     sql += ' WHERE checklistID=?';
     params.push(req.params.id);
 

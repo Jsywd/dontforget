@@ -217,12 +217,18 @@ function hideActionsForAdmin() {
 }
 
 function renderHeader() {
-  // ลบ descBox เก่าออกก่อนทุกครั้ง
+  // 1. ลบ descBox เก่าออกก่อน
   const oldDesc = document.getElementById('desc-box');
   if (oldDesc) oldDesc.remove();
 
   const role = localStorage.getItem('role');
   const isOwner = checklist.isOwner;
+
+  // 2. ส่วนที่ดึงรูปจาก Cloudinary ที่เราคุยกัน
+  // เช็คว่ามี coverImage (URL จาก Cloudinary) หรือไม่
+  const coverHTML = checklist.coverImage 
+    ? `<img src="${checklist.coverImage}" style="width:70px; height:70px; border-radius:8px; object-fit:cover; border: 1px solid var(--border);">` 
+    : `<div class="detail-cover">✅</div>`;
 
   const copyButtonHTML = (role === 'admin' || isOwner) ? '' : `
     <button class="btn btn-secondary" onclick="copyChecklistToMyMine()" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
@@ -230,8 +236,9 @@ function renderHeader() {
     </button>
   `;
 
+  // 3. นำ coverHTML มาใส่แทนที่ดิฟ .detail-cover เดิม
   document.getElementById("detail-header").innerHTML = `
-    <div class="detail-cover">✅</div>
+    ${coverHTML} 
     <div class="detail-info">
       <h2 style="margin:0; color:var(--text-main)">${checklist.title || 'ไม่มีชื่อรายการ'}</h2>
       <p style="margin:4px 0 0; color:var(--text-dim); font-size:0.8rem;">
@@ -241,18 +248,15 @@ function renderHeader() {
     ${copyButtonHTML}
   `;
 
+  // ส่วนแสดง Description (คงเดิม)
   if (checklist.description) {
     const descBox = document.createElement('div');
-    descBox.id = 'desc-box'; // ← เพิ่ม id
+    descBox.id = 'desc-box';
     descBox.style.cssText = `
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 18px;
-      margin-bottom: 20px;
-      color: var(--text-dim);
-      font-size: 0.88rem;
-      line-height: 1.7;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px;
+      margin-bottom: 20px; color: var(--text-dim);
+      font-size: 0.88rem; line-height: 1.7;
     `;
     descBox.innerHTML = `
       <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">📝 คำอธิบาย</div>
