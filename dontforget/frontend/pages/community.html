@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community — Don't Forget</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* --- CSS ส่วนเดิมของคุณ --- */
+    .community-hero {
+      background: linear-gradient(135deg, #0d1f12 0%, #1a3a24 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .community-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -20%;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 70%);
+    }
+    .community-hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+    .community-hero p { color: var(--text-secondary); font-size: 0.9rem; max-width: 400px; }
+    .hero-search { margin-top: 18px; display: flex; gap: 10px; max-width: 480px; }
+    .hero-search input {
+      flex: 1; background: rgba(255,255,255,0.07); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 10px 16px; color: var(--text-primary); font-size: 0.9rem;
+    }
+    .filter-row {
+        display: flex;
+         gap: 10px;
+        flex-wrap: wrap; /* ทำให้ปุ่มเรียงต่อกันไปเรื่อยๆ ถ้าเต็มความกว้างจะขึ้นบรรทัดใหม่ */
+         margin-bottom: 24px;
+         align-items: center;
+    }
+      #cat-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+    .filter-chip {
+  padding: 8px 16px;
+  border-radius: 12px; /* หรือ 99px สำหรับทรงมน */
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap; /* ป้องกันข้อความตัดบรรทัดในปุ่ม */
+}
+    .filter-chip.active {
+  background: var(--accent); /* สีเขียวหลัก */
+  color: #000; /* ตัวอักษรสีดำบนพื้นเขียว */
+  border-color: var(--accent);
+}
+    .community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .pub-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column;
+      position: relative; /* เพิ่มเพื่อให้ปุ่ม Report วางบนการ์ดได้ */
+    }
+    .pub-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
+    .pub-cover {
+      height: 110px; background: linear-gradient(135deg, #1a2e1a, #0d1f12);
+      display: flex; align-items: center; justify-content: center; font-size: 2.4rem; position: relative; overflow: hidden;
+    }
+    .pub-cover img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+    .pub-body { padding: 16px; flex: 1; }
+    .pub-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; line-height: 1.3; }
+    .pub-desc { font-size: 0.8rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .pub-footer { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .pub-author { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-muted); }
+    .pub-author-avatar {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--accent);
+      display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: #000; overflow: hidden;
+    }
+    .copy-badge { font-size: 0.75rem; font-weight: 700; color: var(--accent); background: var(--accent-glow); padding: 2px 8px; border-radius: 99px; }
+    .sort-select { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 12px; color: var(--text-primary); font-size: 0.85rem; cursor: pointer; }
+    .results-info { font-size: 0.82rem; color: var(--text-muted); margin-left: auto; }
+
+    /* --- CSS ที่ต้องมีสำหรับระบบ Report (คุมธีม) --- */
+    .btn-report-trigger {
+      position: absolute; top: 8px; right: 8px; z-index: 10;
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      color: #ff4d4d; width: 30px; height: 30px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; font-size: 0.8rem;
+    }
+    .btn-report-trigger:hover { background: #ff4d4d; color: white; transform: scale(1.1); }
+
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      width: 90%; max-width: 400px; padding: 24px;
+    }
+    .report-options { margin: 16px 0; text-align: left; }
+    .report-options label { display: block; margin-bottom: 10px; cursor: pointer; color: var(--text-primary); }
+    #report-text {
+      width: 100%; background: var(--bg-body); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: white; padding: 10px; margin-top: 10px; height: 80px; resize: none;
+    }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-mount"></div>
+    <main class="main-content">
+
+      <div class="community-hero">
+        <h2>👥 Community Checklists</h2>
+        <p>ค้นหา คัดลอก และแชร์ Checklist กับผู้ใช้ทั่วโลก</p>
+        <div class="hero-search">
+          <input type="text" id="search-input" placeholder="ค้นหา Checklist..." oninput="debounceSearch()">
+          <button class="btn btn-primary" onclick="doSearch()">ค้นหา</button>
+        </div>
+      </div>
+
+      <div id="report-modal" class="modal">
+        <div class="modal-content">
+          <h3 style="color:var(--accent)">🚨 รายงานโพสต์</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">เลือกสาเหตุที่ต้องการแจ้งตรวจสอบ</p>
+          <div class="report-options">
+            <label><input type="checkbox" name="reportReason" value="รูปภาพไม่เหมาะสม"> รูปภาพไม่เหมาะสม</label>
+            <label><input type="checkbox" name="reportReason" value="การใช้คำไม่สุภาพ"> การใช้คำไม่สุภาพ</label>
+            <label><input type="checkbox" name="reportReason" value="เนื้อหาปลอม/สแปม"> เนื้อหาปลอม/สแปม</label>
+            <label><input type="checkbox" name="reportReason" value="อื่นๆ"> อื่นๆ</label>
+          </div>
+          <textarea id="report-text" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeReportModal()">ยกเลิก</button>
+            <button class="btn btn-danger" onclick="submitReport()">ส่งรายงาน</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+      <div id="cat-chips">
+    <div class="filter-chip active" onclick="filterCategory(null, this)">ทั้งหมด</div>
+    </div>
+
+  <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+    <select class="sort-select" id="sort-select" onchange="doSearch()">
+      <option value="popular">ยอดนิยม</option>
+      <option value="newest">ใหม่สุด</option>
+    </select>
+    <span class="results-info" id="results-info"></span>
+  </div>
+</div>
+
+      <div id="community-grid">
+        <div class="loading-state"><div class="spinner"></div><span>กำลังโหลด...</span></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    let allCategories = [];
+    let selectedCategory = null;
+    let selectedInterests = new Set();
+    let searchTimer = null;
+    let currentReportID = null; // ต้องประกาศตัวแปรนี้ไว้
+
+    document.addEventListener('DOMContentLoaded', async () => {
+    // 1. โหลดหมวดหมู่ (ปุ่ม Chip ด้านบน)
+    await loadCategories();
+
+    // 2. ตรวจสอบค่าจาก URL (กดมาจาก Sidebar)
+    const urlParams = new URLSearchParams(window.location.search);
+    const catID = urlParams.get('categoryID');
+
+    if (catID) {
+        selectedCategory = catID;
+        // ไฮไลท์ปุ่ม Chip ด้านบนให้ตรงกับที่กดมา
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            // เช็คว่า chip นี้มี onclick ที่ส่งค่า id ตรงกับ catID หรือไม่
+            if (chip.getAttribute('onclick') && chip.getAttribute('onclick').includes(`filterCategory(${catID}`)) {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            }
+        });
+    }
+
+    // 3. 🚩 เรียกใช้ฟังก์ชันที่มีอยู่จริง (doSearch คือตัวที่ดึงข้อมูลและปิด Spinner)
+    doSearch();
+});
+
+// ✅ แก้ไขฟังก์ชัน doSearch ให้รองรับ API Path ที่ถูกต้อง
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  const sort = document.getElementById('sort-select').value;
+  
+  // 🚩 แก้จุดนี้: เปลี่ยนจาก /api/checklists/search? เป็น /api/checklists?
+  let url = `/api/checklists?`; 
+  
+  if (q) url += `q=${encodeURIComponent(q)}&`;
+  if (selectedCategory) url += `categoryID=${selectedCategory}&`;
+
+  try {
+    const res = await API.get(url);
+    if (res.success) {
+      let data = res.data;
+      
+      // การเรียงลำดับข้อมูล
+      if (sort === 'newest') {
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      } else {
+        data.sort((a, b) => b.copyCount - a.copyCount);
+      }
+
+      document.getElementById('results-info').textContent = `${data.length} รายการ`;
+      renderGrid(data); // เมื่อวาดเสร็จ Spinner จะหายไปเอง
+    }
+  } catch (err) {
+    console.error("Search failed:", err);
+    renderGrid([]); // ถ้าพังให้โชว์หน้าว่าง แทนการหมุนค้าง
+  }
+}
+
+//สร้างฟังก์ชันที่หายไป
+async function loadCommunityData(catID = null) {
+    const container = document.getElementById('community-list'); // เช็ค ID ตัวที่ใช้แสดงการ์ด
+    if (!container) return;
+
+    try {
+        // เปลี่ยน URL ตามที่ Backend รองรับ
+        let url = '/api/checklists'; 
+        if (catID) {
+            url += `?categoryID=${catID}`;
+        }
+
+        const res = await API.get(url);
+        const checklists = res.data || res;
+
+        if (checklists.length > 0) {
+            container.innerHTML = checklists.map(c => renderChecklistCard(c)).join('');
+        } else {
+            container.innerHTML = '<p class="empty-text">ไม่พบ Checklist ในหมวดหมู่นี้</p>';
+        }
+    } catch (err) {
+        console.error("Load failed:", err);
+        container.innerHTML = '<p class="error-text">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+    }
+}
+
+// ฟังก์ชันวาดการ์ด (ถ้าคุณมีอยู่แล้วให้ใช้ของเดิม)
+function renderChecklistCard(c) {
+    return `
+        <div class="rec-card" onclick="location.href='/pages/checklist-detail.html?id=${c.checklistID}'">
+            <div class="rec-card-cover">
+                ${c.coverImage ? `<img src="${c.coverImage}">` : (c.icon || '📋')}
+            </div>
+            <div class="rec-card-body">
+                <div class="rec-card-title">${c.title}</div>
+                <div class="rec-card-meta">@${c.username} • ${c.itemCount || 0} รายการ</div>
+            </div>
+        </div>
+    `;
+}
+
+    async function loadCategories(user) {
+  const res = await API.get('/api/categories');
+  if (!res.success) return;
+  allCategories = res.data;
+  
+  const chips = document.getElementById('cat-chips');
+  
+  // สร้าง HTML สำหรับปุ่ม "ทั้งหมด" ก่อน
+  let html = `<div class="filter-chip ${!selectedCategory ? 'active' : ''}" 
+                onclick="filterCategory(null, this)">ทั้งหมด</div>`;
+  
+  // ต่อด้วยหมวดหมู่จาก API
+  html += allCategories.map(c => `
+    <div class="filter-chip ${c.categoryID == selectedCategory ? 'active' : ''}" 
+         onclick="filterCategory(${c.categoryID}, this)">
+      ${c.icon || ''} ${c.categoryName}
+    </div>`).join('');
+    
+  chips.innerHTML = html;
+}
+
+    function filterCategory(id, el) {
+      selectedCategory = id;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      doSearch();
+    }
+
+    function debounceSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(doSearch, 400);
+    }
+
+    
+
+    // --- Report Functions ---
+    function openReportModal(event, checklistID) {
+      event.stopPropagation();
+      currentReportID = checklistID;
+      document.getElementById('report-modal').classList.add('show');
+    }
+
+    function closeReportModal() {
+      document.getElementById('report-modal').classList.remove('show');
+      document.querySelectorAll('input[name="reportReason"]').forEach(cb => cb.checked = false);
+      document.getElementById('report-text').value = '';
+    }
+
+    async function submitReport() {
+      const selected = document.querySelectorAll('input[name="reportReason"]:checked');
+      const reasons = Array.from(selected).map(cb => cb.value).join(', ');
+      const details = document.getElementById('report-text').value.trim();
+      if (!reasons) { alert('กรุณาเลือกสาเหตุอย่างน้อย 1 ข้อ'); return; }
+
+    const res = await API.post('/api/checklists/reports', {
+      checklistID: currentReportID,
+      reasonType: reasons,
+       reasonDetails: details
+    });
+
+      if (res.success) {
+        alert('ส่งรายงานเรียบร้อยแล้ว');
+        closeReportModal();
+      } else {
+        alert(res.message || 'เกิดข้อผิดพลาด');
+      }
+    }
+
+    function renderGrid(list) {
+      const el = document.getElementById('community-grid');
+      if (!list.length) {
+        el.innerHTML = `<div class="empty-state"><h3>ไม่พบ Checklist</h3></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="community-grid">` + list.map(c => {
+        const catColor = getCategoryColor(c.categoryName);
+        const initials = (c.username || 'U').substring(0, 2).toUpperCase();
+        return `
+          <div class="pub-card" onclick="window.location.href='/pages/checklist-detail.html?id=${c.checklistID}'">
+            <button class="btn-report-trigger" title="รายงานโพสต์นี้" onclick="openReportModal(event, ${c.checklistID})">🚩</button>
+            <div class="pub-cover">
+              ${c.coverImage ? `<img src="${c.coverImage}" alt="">` : (c.icon || '📋')}
+            </div>
+            <div class="pub-body">
+              <div class="pub-title">${c.title}</div>
+              ${c.description ? `<div class="pub-desc">${c.description}</div>` : ''}
+              ${c.categoryName ? `<div style="margin-top:8px"><span class="badge" style="background:${catColor}22;color:${catColor}">${c.icon||'📂'} ${c.categoryName}</span></div>` : ''}
+            </div>
+            <div class="pub-footer">
+              <div class="pub-author">
+                <div class="pub-author-avatar">${c.avatar ? `<img src="${c.avatar}" alt="">` : initials}</div>
+                @${c.username}
+              </div>
+              <span class="copy-badge">📋 ${c.copyCount} copies</span>
+            </div>
+          </div>`;
+      }).join('') + `</div>`;
+    }
+  </script>
+</body>
+</html>

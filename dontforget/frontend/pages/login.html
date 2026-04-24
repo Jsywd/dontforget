@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ — Don't Forget</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-primary); font-family: 'Inter', sans-serif; }
+    .auth-container { width: 100%; max-width: 420px; padding: 16px; }
+    .auth-logo { text-align: center; margin-bottom: 32px; }
+    .auth-logo h1 { font-size: 2rem; font-weight: 700; }
+    .auth-logo h1 span { color: var(--accent); }
+    .auth-logo p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+    .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
+    .auth-tabs { display: flex; background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; }
+    .auth-tab { flex: 1; padding: 8px; text-align: center; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); transition: all 0.2s; }
+    .auth-tab.active { background: var(--bg-card); color: var(--text-primary); }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--text-muted); font-size: 0.8rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 11px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .btn-google:hover { background: var(--bg-hover); }
+    .btn-google img { width: 18px; height: 18px; }
+    .submit-btn { width: 100%; padding: 12px; background: var(--accent); color: #000; border: none; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+    .submit-btn:hover { background: var(--accent-dark); opacity: 0.9; }
+    .error-msg { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px; display: none; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-secondary); }
+    .form-input { width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: white; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <h1>Don<span>'t</span>Forget</h1>
+      <p>จัดการ Checklist ของคุณได้ทุกที่</p>
+    </div>
+
+    <div class="auth-card">
+      <a href="/auth/google" class="btn-google">
+        <img src="https://www.google.com/favicon.ico" alt="Google">
+        เข้าสู่ระบบด้วย Google
+      </a>
+
+      <div class="divider">หรือ</div>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchTab('login')">เข้าสู่ระบบ</div>
+        <div class="auth-tab" onclick="switchTab('register')">สมัครสมาชิก</div>
+      </div>
+
+      <div class="error-msg" id="error-msg"></div>
+
+      <div class="auth-form active" id="login-form">
+        <div class="form-group">
+          <label class="form-label">อีเมล</label>
+          <input type="email" id="login-email" class="form-input" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่าน</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••">
+        </div>
+        <button class="submit-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+      </div>
+
+      <div class="auth-form" id="register-form">
+        <div class="form-group">
+          <label class="form-label">ชื่อผู้ใช้</label>
+          <input type="text" id="reg-username" class="form-input" placeholder="ชื่อของคุณ">
+        </div>
+        <div class="form-group">
+          <label class="form-label">อีเมล</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่าน</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="อย่างน้อย 8 ตัวอักษร">
+        </div>
+        <button class="submit-btn" onclick="doRegister()">สมัครสมาชิก</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ตรวจสอบสถานะ
+    fetch('/auth/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => { 
+        if (localStorage.getItem('isAdmin') === 'true') {
+          window.location.href = '/pages/admin.html';
+        } else if (data.loggedIn) {
+          window.location.href = '/pages/dashboard.html'; 
+        }
+      }).catch(() => {});
+
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+      });
+      document.getElementById('login-form').classList.toggle('active', tab === 'login');
+      document.getElementById('register-form').classList.toggle('active', tab === 'register');
+      showError('');
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.style.display = msg ? 'block' : 'none';
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return showError('กรุณากรอกข้อมูลให้ครบ');
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        }).then(r => r.json());
+
+        if (res.success) {
+          localStorage.setItem('role', res.user.role); 
+          localStorage.setItem('isAdmin', res.user.role === 'admin' ? 'true' : 'false');
+          localStorage.setItem('user', JSON.stringify(res.user));
+          window.location.href = res.user.role === 'admin' ? '/pages/admin.html' : '/pages/dashboard.html';
+        } else {
+          showError(res.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+        }
+      } catch (e) { showError('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }
+    }
+
+    async function doRegister() {
+      const username = document.getElementById('reg-username').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      if (!username || !email || !password) return showError('กรุณากรอกข้อมูลให้ครบ');
+      try {
+        const res = await fetch('/auth/register', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        }).then(r => r.json());
+        if (res.success) window.location.href = '/pages/dashboard.html';
+        else showError(res.message || 'เกิดข้อผิดพลาด');
+      } catch (e) { showError('เกิดข้อผิดพลาด'); }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('login-form').classList.contains('active')) doLogin();
+        else doRegister();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ผู้ดูแลระบบ — Don't Forget</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-header { margin-bottom: 28px; }
+    .admin-header h2 { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+    
+    .admin-stats { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 16px; 
+      margin-bottom: 32px; 
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-number { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .report-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+    .report-card:hover { transform: translateY(-4px); }
+    
+    .report-card-body { padding: 16px; flex: 1; }
+    .report-card-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; color: var(--text-main); }
+    
+    .report-reason-box { 
+      background: rgba(231, 76, 60, 0.1); 
+      border-left: 4px solid #e74c3c;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .report-card-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--border);
+    }
+    .btn-action {
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .btn-keep { background: #2ecc71; color: white; }
+    .btn-keep:hover { background: #27ae60; }
+    .btn-delete { background: #e74c3c; color: white; }
+    .btn-delete:hover { background: #c0392b; }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      background: #f1c40f22;
+      color: #f1c40f;
+    }
+
+    
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-mount"></div>
+
+    <main class="main-content">
+      <div class="admin-header">
+        <h2>🛡️ Admin Dashboard</h2>
+        <p style="color: var(--text-muted);">จัดการรายการแจ้งรีพอร์ตและดูแลความเรียบร้อย</p>
+      </div>
+      <div id="report-modal" class="modal">
+  <div class="modal-content">
+    <h3 style="color:var(--accent)">🚨 รายงานโพสต์ (โหมดผู้ดูแล)</h3>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">ระบุเหตุผลในการจัดการโพสต์นี้</p>
+    <div class="report-options">
+      <label><input type="checkbox" name="reportReason" value="รูปภาพไม่เหมาะสม"> รูปภาพไม่เหมาะสม</label>
+      <label><input type="checkbox" name="reportReason" value="การใช้คำไม่สุภาพ"> การใช้คำไม่สุภาพ</label>
+      <label><input type="checkbox" name="reportReason" value="เนื้อหาปลอม/สแปม"> เนื้อหาปลอม/สแปม</label>
+      <label><input type="checkbox" name="reportReason" value="อื่นๆ"> อื่นๆ</label>
+    </div>
+    <textarea id="report-text" placeholder="ระบุรายละเอียดเพิ่มเติม..." 
+              style="width: 100%; height: 80px; background: var(--bg-body); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 8px; resize: none; margin-top: 10px;"></textarea>
+    <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+      <button class="btn btn-secondary" onclick="closeReportModal()">ยกเลิก</button>
+      <button class="btn btn-danger" onclick="submitReport()">ส่งรายงาน</button>
+    </div>
+  </div>
+</div>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="total-reports">0</div>
+          <div class="stat-label">รีพอร์ตทั้งหมด</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="pending-reports" style="color: #f1c40f;">0</div>
+          <div class="stat-label">รอตรวจสอบ</div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 16px; font-weight: 700;">รายการรีพอร์ตล่าสุด</div>
+      <div id="reportList" class="report-grid"></div>
+    </main>
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    // --- ระบบ Auto-Refresh เมื่อกลับมาที่หน้านี้ ---
+    window.addEventListener('focus', () => {
+      console.log('สลับกลับมาหน้าแอดมิน: กำลังอัปเดตข้อมูลล่าสุด...');
+      loadReports();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+  const role = localStorage.getItem('role');
+  if (role !== 'admin') {
+    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+    window.location.href = '/pages/login.html';
+  }
+  loadReports();
+});
+
+    async function loadReports() {
+      try {
+        const res = await API.get('/api/checklists/admin/reports'); 
+        const list = document.getElementById('reportList');
+        
+        if (res && res.success && Array.isArray(res.data)) {
+          const reports = res.data;
+          
+          document.getElementById('total-reports').textContent = reports.length;
+          document.getElementById('pending-reports').textContent = reports.filter(r => r.status === 'pending').length;
+
+          if (reports.length === 0) {
+            list.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">ยินดีด้วย! ไม่มีรีพอร์ตค้างในขณะนี้</div>';
+            return;
+          }
+
+          // คัดลอกส่วนนี้ไปทับใน list.innerHTML = reports.map(...) เดิมครับ
+list.innerHTML = reports.map(r => `
+  <div class="report-card">
+    <div style="width: 100%; height: 150px; background: #222; position: relative; overflow: hidden;">
+      ${r.coverImage 
+        ? `<img src="${r.coverImage}" style="width: 100%; height: 100%; object-fit: cover;">` 
+        : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#555;">No Cover</div>`
+      }
+      <a href="/pages/checklist-detail.html?id=${r.checklistID}&from=admin" 
+         style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.85); color: white; padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+         🔍 ตรวจสอบโพสต์
+      </a>
+    </div> <div class="report-card-body">
+      <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+        <span class="status-badge">${r.status}</span>
+        <small style="color: var(--text-muted);">โดย @${r.username}</small>
+      </div>
+      <div class="report-card-title">${r.title || 'ไม่มีชื่อเรื่อง'}</div>
+      <div class="report-reason-box">
+        <b style="font-size: 0.85rem; color: #e74c3c;">🚩 ${r.reasonType}</b>
+        <p style="font-size: 0.8rem; margin-top: 4px; color: var(--text-main); line-height: 1.4;">${r.reasonDetails || '-'}</p>
+      </div>
+    </div>
+
+    <div class="report-card-footer">
+      <button class="btn-action btn-keep" onclick="updateStatus(${r.reportID}, 'resolved')">✅ เก็บไว้</button>
+      <button class="btn-action btn-delete" onclick="deletePost(${r.checklistID})">🗑️ ลบโพสต์</button>
+    </div>
+  </div>
+`).join('');
+        }
+      } catch (err) {
+        console.error("โหลดข้อมูลล้มเหลว:", err);
+      }
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        const res = await API.put(`/api/checklists/admin/reports/${id}`, { status });
+        if (res.success) {
+          loadReports(); // โหลดใหม่ทันทีหลังจากกดปุ่ม
+        }
+      } catch (err) { alert('ไม่สามารถอัปเดตได้'); }
+    }
+
+    async function deletePost(cID) {
+      if (!confirm('ยืนยันการลบโพสต์นี้ถาวร?')) return;
+      try {
+        const res = await API.delete(`/api/checklists/admin/posts/${cID}`);
+        if (res.success) {
+          loadReports(); // โหลดใหม่ทันทีหลังจากลบ
+        } else {
+          alert('เกิดข้อผิดพลาด: ' + res.message);
+        }
+      } catch (err) { alert('ไม่สามารถลบได้'); }
+    }
+
+    let currentReportID = null;
+
+// ฟังก์ชันเปิด Modal
+function openReportModal(event, checklistID) {
+    if (event) event.stopPropagation(); // กันไม่ให้คลิกทะลุไปหน้า detail
+    currentReportID = checklistID;
+    const modal = document.getElementById('report-modal');
+    if (modal) modal.classList.add('show');
+}
+
+// ฟังก์ชันปิด Modal
+function closeReportModal() {
+    document.getElementById('report-modal').classList.remove('show');
+    document.querySelectorAll('input[name="reportReason"]').forEach(cb => cb.checked = false);
+    document.getElementById('report-text').value = '';
+}
+
+// ฟังก์ชันส่งข้อมูลเข้า DB
+async function submitReport() {
+    const selected = document.querySelectorAll('input[name="reportReason"]:checked');
+    const reasons = Array.from(selected).map(cb => cb.value).join(', ');
+    const details = document.getElementById('report-text').value.trim();
+
+    if (!reasons) { 
+        alert('กรุณาเลือกสาเหตุอย่างน้อย 1 ข้อ'); 
+        return; 
+    }
+
+    try {
+        const res = await API.post('/api/checklists/reports', {
+            checklistID: currentReportID,
+            reasonType: reasons,
+            reasonDetails: details
+        });
+
+        if (res.success) {
+            alert('ส่งรายงานเรียบร้อยแล้ว');
+            closeReportModal();
+            loadReports(); // รีโหลดรายการในหน้าแอดมินทันทีเพื่อดูผล
+        } else {
+            alert(res.message || 'เกิดข้อผิดพลาด');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+    }
+}
+  </script>
+</body>
+</html>

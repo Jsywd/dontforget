@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Don't Forget</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .splash {
+      text-align: center;
+    }
+    .splash h1 { font-size: 3rem; font-weight: 800; margin-bottom: 8px; }
+    .splash h1 span { color: var(--accent); }
+    .splash p { color: var(--text-muted); margin-bottom: 24px; }
+    .spinner { margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div class="splash">
+    <h1>Don<span>'t</span>Forget</h1>
+    <p>จัดการ Checklist ของคุณ</p>
+    <div class="spinner"></div>
+  </div>
+  <script>
+    fetch('/auth/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.loggedIn) window.location.href = '/pages/dashboard.html';
+        else window.location.href = '/pages/login.html';
+      })
+      .catch(() => window.location.href = '/pages/login.html');
+  </script>
+</body>
+</html>
