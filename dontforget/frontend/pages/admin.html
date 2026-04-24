@@ -135,7 +135,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await API.get('/api/auth/me'); // เช็คจาก Server จริงๆ
+    const res = await API.get('/auth/me');
     if (!res.loggedIn || res.user.role !== 'admin') {
       alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
       window.location.href = '/pages/login.html';

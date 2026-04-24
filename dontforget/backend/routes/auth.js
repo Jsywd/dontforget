@@ -45,16 +45,17 @@ router.post('/login', (req, res, next) => {
       if (err) return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาด' });
       
       // ✅ แก้ไขจาก newUser[0] เป็น user ตรงๆ (เพราะ Passport คืนค่ามาให้แล้ว)
-      res.json({ 
-        success: true, 
+      // เปลี่ยนบรรทัด res.json ใน Register เป็นแบบนี้
+res.json({ 
+  success: true, 
         user: { 
           userID: user.userID, 
           username: user.username, 
           email: user.email, 
           avatar: user.avatar,
-          role: user.role // เพิ่ม role กลับมาด้วยตามที่เราคุยกัน
-        } 
-      });
+          role: user.role
+  } 
+});
     });
   })(req, res, next);
 });
