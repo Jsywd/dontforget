@@ -1,4 +1,3 @@
-// backend/routes/auth.js
 const express = require("express");
 const router = express.Router();
 const passport = require("../config/passport");
@@ -6,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const db = require("../config/db");
 require("dotenv").config();
 
-// ─── Register ─────────────────────────────────────────────────────────────────
+// Register 
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password)
@@ -53,9 +52,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ─── Login ────────────────────────────────────────────────────────────────────
-// ─── Login ────────────────────────────────────────────────────────────────────
-// ─── Login ────────────────────────────────────────────────────────────────────
+// Login
 router.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err)
@@ -74,8 +71,6 @@ router.post("/login", (req, res, next) => {
           .status(500)
           .json({ success: false, message: "เกิดข้อผิดพลาด" });
 
-      // ✅ แก้ไขจาก newUser[0] เป็น user ตรงๆ (เพราะ Passport คืนค่ามาให้แล้ว)
-      // เปลี่ยนบรรทัด res.json ใน Register เป็นแบบนี้
       res.json({
         success: true,
         user: {
@@ -90,27 +85,23 @@ router.post("/login", (req, res, next) => {
   })(req, res, next);
 });
 
-// ─── Logout ───────────────────────────────────────────────────────────────────
+// Logout 
 router.post("/logout", (req, res) => {
   req.logout(() => res.json({ success: true }));
 });
 
-// ─── Get current user ─────────────────────────────────────────────────────────
-// ─── Get current user ─────────────────────────────────────────────────────────
+// Get current user 
 router.get("/me", (req, res) => {
   if (!req.isAuthenticated()) return res.json({ loggedIn: false });
 
-  // ✅ ดึง role ออกมาด้วย
   const { userID, username, email, avatar, role } = req.user;
   res.json({
     loggedIn: true,
-    user: { userID, username, email, avatar, role }, // <--- เพิ่ม role เข้าไป
+    user: { userID, username, email, avatar, role },
   });
 });
 
-// ─── Google OAuth ─────────────────────────────────────────────────────────────
-
-// 1. เส้นทางหลักที่กดจากหน้า Login
+// Google OAuth
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -118,12 +109,10 @@ router.get(
   }),
 );
 
-// 2. เส้นทางที่ Google จะส่งข้อมูลกลับมา (Callback)
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/pages/login.html" }),
   (req, res) => {
-    // ล็อกอินสำเร็จ! ตรวจสอบ role เพื่อแยกหน้า Redirect
     const user = req.user;
     if (user.role === "admin") {
       res.redirect("/pages/admin.html");

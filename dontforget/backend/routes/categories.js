@@ -1,4 +1,3 @@
-// backend/routes/categories.js
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
@@ -30,7 +29,7 @@ router.get("/interests", isAuthenticated, async (req, res) => {
 });
 
 router.post("/interests", isAuthenticated, async (req, res) => {
-  const { categoryIDs } = req.body; // array of IDs
+  const { categoryIDs } = req.body;
   try {
     await db.query("DELETE FROM user_interests WHERE userID = ?", [
       req.user.userID,

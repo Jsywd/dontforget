@@ -1,10 +1,9 @@
-// backend/routes/places.js
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const { isAuthenticated } = require("../middleware/auth");
 
-// ─── POST: Add place to checklist item ────────────────────────────────────────
+// POST: Add place to checklist item 
 router.post("/", isAuthenticated, async (req, res) => {
   const {
     checklistID,
@@ -50,7 +49,7 @@ router.post("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── PUT: Update place ────────────────────────────────────────────────────────
+// PUT: Update place 
 router.put("/:id", isAuthenticated, async (req, res) => {
   const { placeName, address, latitude, longitude, placeType, rating } =
     req.body;
@@ -80,7 +79,7 @@ router.put("/:id", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── DELETE: Remove place ─────────────────────────────────────────────────────
+// DELETE: Remove place 
 router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const [place] = await db.query(
@@ -97,7 +96,7 @@ router.delete("/:id", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── GET: All places in checklist ─────────────────────────────────────────────
+// GET: All places in checklist 
 router.get("/checklist/:checklistID", async (req, res) => {
   try {
     const [rows] = await db.query(

@@ -229,7 +229,6 @@
     <script src="/js/sidebar.js"></script>
     <script src="/js/app.js"></script>
     <script>
-      // --- ระบบ Auto-Refresh เมื่อกลับมาที่หน้านี้ ---
       window.addEventListener("focus", () => {
         console.log("สลับกลับมาหน้าแอดมิน: กำลังอัปเดตข้อมูลล่าสุด...");
         loadReports();
@@ -268,7 +267,6 @@
               return;
             }
 
-            // คัดลอกส่วนนี้ไปทับใน list.innerHTML = reports.map(...) เดิมครับ
             list.innerHTML = reports
               .map(
                 (r) => `
@@ -315,7 +313,7 @@
             status,
           });
           if (res.success) {
-            loadReports(); // โหลดใหม่ทันทีหลังจากกดปุ่ม
+            loadReports(); 
           }
         } catch (err) {
           alert("ไม่สามารถอัปเดตได้");
@@ -327,7 +325,7 @@
         try {
           const res = await API.delete(`/api/checklists/admin/posts/${cID}`);
           if (res.success) {
-            loadReports(); // โหลดใหม่ทันทีหลังจากลบ
+            loadReports(); 
           } else {
             alert("เกิดข้อผิดพลาด: " + res.message);
           }
@@ -338,15 +336,13 @@
 
       let currentReportID = null;
 
-      // ฟังก์ชันเปิด Modal
       function openReportModal(event, checklistID) {
-        if (event) event.stopPropagation(); // กันไม่ให้คลิกทะลุไปหน้า detail
+        if (event) event.stopPropagation(); 
         currentReportID = checklistID;
         const modal = document.getElementById("report-modal");
         if (modal) modal.classList.add("show");
       }
 
-      // ฟังก์ชันปิด Modal
       function closeReportModal() {
         document.getElementById("report-modal").classList.remove("show");
         document
@@ -355,7 +351,7 @@
         document.getElementById("report-text").value = "";
       }
 
-      // ฟังก์ชันส่งข้อมูลเข้า DB
+      // ส่งข้อมูลเข้า DB
       async function submitReport() {
         const selected = document.querySelectorAll(
           'input[name="reportReason"]:checked',
@@ -380,7 +376,7 @@
           if (res.success) {
             alert("ส่งรายงานเรียบร้อยแล้ว");
             closeReportModal();
-            loadReports(); // รีโหลดรายการในหน้าแอดมินทันทีเพื่อดูผล
+            loadReports(); 
           } else {
             alert(res.message || "เกิดข้อผิดพลาด");
           }

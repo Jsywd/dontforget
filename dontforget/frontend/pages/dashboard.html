@@ -30,7 +30,6 @@
         font-weight: 700;
       }
 
-      /* Recommended cards */
       .rec-cards {
         display: flex;
         gap: 16px;
@@ -106,7 +105,6 @@
         justify-content: space-between;
       }
 
-      /* Popular list */
       .popular-item {
         display: flex;
         align-items: center;
@@ -166,7 +164,6 @@
         white-space: nowrap;
       }
 
-      /* Quick stats */
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -199,13 +196,11 @@
       <div id="sidebar-mount"></div>
 
       <main class="main-content">
-        <!-- Greeting -->
         <div class="greeting">
           <h2 id="greeting-text">สวัสดี 👋</h2>
           <p id="greeting-sub">แนะนำสำหรับคุณวันนี้</p>
         </div>
 
-        <!-- Quick stats -->
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-number" id="stat-total">—</div>
@@ -237,7 +232,6 @@
           </div>
         </div>
 
-        <!-- Popular -->
         <div>
           <div class="section-header">
             <div class="section-title">🔥 Checklist ยอดนิยม</div>
@@ -268,20 +262,18 @@
         const urlParams = new URLSearchParams(window.location.search);
         const categoryId = urlParams.get("category");
 
-        // --- การจัดการ UI เมื่อมีการเลือกหมวดหมู่ ---
         if (categoryId) {
           document.getElementById("greeting-sub").textContent =
             `กำลังแสดงเช็คลิสต์ในหมวดหมู่ที่คุณเลือก`;
           document.querySelector(".stats-grid").style.display = "none";
 
-          // ซ่อนส่วน "ยอดนิยม" เพื่อให้ผลการค้นหาเด่นชัด
           const popularSection = document
             .getElementById("popular-list")
             .closest("div");
           if (popularSection) popularSection.style.display = "none";
         }
 
-        // โหลดสถิติ (Stats)
+        // โหลด Stats
         const myRes = await API.get("/api/checklists/my");
         if (myRes && myRes.success) {
           const all = myRes.data || [];
@@ -294,8 +286,7 @@
           ).length;
         }
 
-        // --- โหลดข้อมูลแนะนำหรือหมวดหมู่ ---
-        // --- โหลดข้อมูลแนะนำหรือหมวดหมู่ ---
+        // โหลดข้อมูลแนะนำหรือหมวดหมู่ 
         let recUrl = categoryId
           ? `/api/checklists?category=${categoryId}`
           : "/api/checklists/recommended";
@@ -331,7 +322,6 @@
         const recEl = document.getElementById("rec-cards");
         const recData = recRes.value?.data || [];
 
-        // ถ้า recommended ว่าง → ใช้ popular แทน
         const displayRec =
           recData.length > 0 ? recData : (popRes.value?.data || []).slice(0, 5);
 

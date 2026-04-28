@@ -1,4 +1,3 @@
-// backend/config/passport.js
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
@@ -17,7 +16,7 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// ─── Local Strategy ───────────────────────────────────────────────────────────
+// Local Strategy 
 passport.use(
   new LocalStrategy(
     { usernameField: "email" },
@@ -44,7 +43,7 @@ passport.use(
   ),
 );
 
-// ─── Google OAuth Strategy ────────────────────────────────────────────────────
+// Google OAuth Strategy 
 passport.use(
   new GoogleStrategy(
     {
@@ -57,14 +56,12 @@ passport.use(
         const email = profile.emails[0].value;
         const avatar = profile.photos[0]?.value || null;
 
-        // Check existing user by googleID or email
         let [rows] = await db.query(
           "SELECT * FROM users WHERE googleID = ? OR email = ?",
           [profile.id, email],
         );
 
         if (rows.length) {
-          // Update googleID if missing
           if (!rows[0].googleID) {
             await db.query(
               "UPDATE users SET googleID = ?, avatar = ? WHERE userID = ?",

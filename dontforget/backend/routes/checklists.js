@@ -1,12 +1,10 @@
-// backend/routes/checklists.js
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const { isAuthenticated } = require("../middleware/auth");
 
-// ─── Multer config for images ─────────────────────────────────────────────────
-const { uploadCover } = require("../config/cloudinary"); // เรียกใช้จากไฟล์คอนฟิกที่คุณสร้าง
-// ─── GET: My checklists ───────────────────────────────────────────────────────
+// Multer config for images 
+const { uploadCover } = require("../config/cloudinary"); 
 router.get("/my", isAuthenticated, async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -27,7 +25,7 @@ router.get("/my", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── GET: Popular / Community checklists ─────────────────────────────────────
+// GET: Popular / Community checklists 
 router.get("/popular", async (req, res) => {
   try {
     const [rows] = await db.query(`
@@ -46,7 +44,7 @@ router.get("/popular", async (req, res) => {
   }
 });
 
-// ─── GET: Recommended by interests ───────────────────────────────────────────
+// GET: Recommended by interests
 router.get("/recommended", isAuthenticated, async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -69,10 +67,8 @@ router.get("/recommended", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── GET: Search checklists ───────────────────────────────────────────────────
-// 🚩 แก้ไข Route สำหรับดึง Checklist ทั้งหมด
+// GET: Search checklists 
 router.get("/", async (req, res) => {
-  // รับค่า categoryID (จาก Sidebar) และ q (จากช่องค้นหา)
   const { category, categoryID, q } = req.query;
   const catID = category || categoryID;
 
@@ -105,10 +101,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ─── GET: Single checklist with items & all places ────────────────────────────
+// GET: Single checklist with items & all places 
 router.get("/:id", async (req, res) => {
   try {
-    // 1. ดึงข้อมูลพื้นฐานของ Checklist
     const [cl] = await db.query(
       `
       SELECT c.*, u.username, u.avatar, cat.categoryName
@@ -129,14 +124,13 @@ router.get("/:id", async (req, res) => {
     const isOwner =
       req.isAuthenticated() && req.user.userID === checklist.userID;
 
-    // 2. ตรวจสอบสิทธิ์การเข้าถึง
     if (!checklist.isPublic && !isOwner) {
       return res
         .status(403)
         .json({ success: false, message: "Checklist นี้เป็นส่วนตัว" });
     }
 
-    // 3. ดึงรายการ Items ทั้งหมด และ Join สถานที่ที่ผูกกับ Item (ถ้ามี)
+    // ดึงรายการ Items ทั้งหมด 
     const [items] = await db.query(
       `
       SELECT i.*, p.placeName, p.address, p.latitude, p.longitude, p.placeID
@@ -148,7 +142,7 @@ router.get("/:id", async (req, res) => {
       [req.params.id],
     );
 
-    // 4. ดึงสถานที่ทั้งหมดของ Checklist นี้ (รวมพิกัดที่ปักลอยๆ ไม่ผูกกับ Item)
+    // 4. ดึงสถานที่ทั้งหมดของ Checklist นี้ 
     const [allPlaces] = await db.query(
       `
       SELECT * FROM places WHERE checklistID = ?
@@ -156,7 +150,6 @@ router.get("/:id", async (req, res) => {
       [req.params.id],
     );
 
-    // 5. ส่งข้อมูลกลับเพียงครั้งเดียว
     res.json({
       success: true,
       data: {
@@ -172,7 +165,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ─── POST: Create checklist ───────────────────────────────────────────────────
+// POST: Create checklist 
 router.post(
   "/",
   isAuthenticated,
@@ -184,7 +177,7 @@ router.post(
         .status(400)
         .json({ success: false, message: "กรุณากรอกชื่อ Checklist" });
 
-    // req.file.path จะเป็น URL ของ Cloudinary โดยตรง (เช่น https://res.cloudinary.com/...)
+    // req.file.path URL ของ Cloudinary 
     const coverImage = req.file ? req.file.path : null;
 
     try {
@@ -206,9 +199,7 @@ router.post(
   },
 );
 
-// ─── PUT: Update checklist ────────────────────────────────────────────────────
-// ─── PUT: Update checklist ────────────────────────────────────────────────────
-// เปลี่ยนเป็น uploadCover.single
+// PUT: Update checklist 
 router.put(
   "/:id",
   isAuthenticated,
@@ -236,7 +227,7 @@ router.put(
 
       if (req.file) {
         sql += ", coverImage=?";
-        params.push(req.file.path); // ใช้ path (URL) จาก Cloudinary
+        params.push(req.file.path);
       }
 
       sql += " WHERE checklistID=?";
@@ -250,7 +241,7 @@ router.put(
   },
 );
 
-// ─── DELETE: Delete checklist ─────────────────────────────────────────────────
+// DELETE: Delete checklist 
 router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const [cl] = await db.query(
@@ -268,7 +259,7 @@ router.delete("/:id", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── POST: Copy checklist ─────────────────────────────────────────────────────
+// POST: Copy checklist 
 router.post("/:id/copy", isAuthenticated, async (req, res) => {
   try {
     const [cl] = await db.query(
@@ -316,11 +307,8 @@ router.post("/:id/copy", isAuthenticated, async (req, res) => {
 
 module.exports = router;
 
-// ตัวอย่างการวางในไฟล์ backend/routes/checklists.js หรือไฟล์ที่จัดการ API
-
-// 1. API สำหรับผู้ใช้ทั่วไป: ส่งรายงาน (Report)
+// API สำหรับผู้ใช้ทั่วไป ส่งรายงาน (Report)
 router.post("/reports", async (req, res) => {
-  // ตัด /api ออก
   try {
     const { checklistID, reasonType, reasonDetails } = req.body;
     if (!req.isAuthenticated()) {
@@ -338,12 +326,10 @@ router.post("/reports", async (req, res) => {
   }
 });
 
-// ─── Admin/Public Reports APIs (No Auth) ──────────────────────────────────────
 
-// 1. ดึงรายการรีพอร์ตทั้งหมดที่สถานะเป็น 'pending'
+// ดึงรายการรีพอร์ตทั้งหมดที่สถานะเป็น pending
 router.get("/admin/reports", async (req, res) => {
   try {
-    // ดึงข้อมูลเพิ่ม: c.coverImage เพื่อเอามาโชว์รูป
     const [rows] = await db.query(`
       SELECT 
         r.*, 
@@ -363,11 +349,9 @@ router.get("/admin/reports", async (req, res) => {
   }
 });
 
-// 2. ยกเลิกรีพอร์ต (เปลี่ยนสถานะเป็น resolved)
 router.put("/admin/reports/:id", async (req, res) => {
   try {
-    // เมื่อกดยืนยันว่า "เก็บไว้" เราจะไม่แค่เปลี่ยนสถานะ
-    // แต่เราจะลบ "รายการแจ้งรีพอร์ต" นั้นทิ้งไปเลย เพื่อไม่ให้หนักฐานข้อมูล
+
     const reportID = req.params.id;
 
     await db.query("DELETE FROM reports WHERE reportID = ?", [reportID]);
@@ -382,7 +366,7 @@ router.put("/admin/reports/:id", async (req, res) => {
   }
 });
 
-// 3. ลบโพสต์ทิ้ง (ลบ checklistID นั้นออกไปเลย)
+// 3. ลบโพสต์ทิ้ง 
 router.delete("/admin/posts/:id", async (req, res) => {
   try {
     await db.query("DELETE FROM checklists WHERE checklistID = ?", [

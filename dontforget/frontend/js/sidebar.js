@@ -1,7 +1,6 @@
-// ฟังก์ชันสำหรับสร้าง HTML ของเมนูตาม Role
 function getSidebarContent(isAdmin) {
   if (isAdmin) {
-    // --- เมนูสำหรับ Admin ---
+    // Admin 
     return `
     <aside class="sidebar admin-theme" id="sidebar">
       <div class="sidebar-logo">
@@ -33,7 +32,7 @@ function getSidebarContent(isAdmin) {
 </div>
     </aside>`;
   } else {
-    // --- เมนูสำหรับ User ปกติ (โค้ดเดิมของคุณ) ---
+    // User 
     return `
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
@@ -77,7 +76,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const target = document.getElementById("sidebar-mount");
   if (!target) return;
 
-  // ดึงข้อมูล user จาก server แทน localStorage
   let isAdmin = false;
   let user = null;
 
@@ -92,7 +90,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   target.innerHTML = getSidebarContent(isAdmin);
 
-  // แสดงข้อมูล user ใน sidebar
   if (user) {
     const nameEl = document.querySelector(".user-name");
     const emailEl = document.querySelector(".user-email");

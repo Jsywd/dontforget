@@ -1,6 +1,4 @@
-// frontend/js/app.js — shared utilities (แก้ไขเวอร์ชันรองรับ Admin Hardcode)
-
-// ─── API helper ───────────────────────────────────────────────────────────────
+// API helper 
 const API = {
   async request(method, url, data = null, isForm = false) {
     const opts = {
@@ -10,11 +8,8 @@ const API = {
     };
 
     if (isForm) {
-      // สำหรับ FormData: ห้ามตั้ง Content-Type เองเด็ดขาด
-      // บราวเซอร์จะใส่ multipart/form-data พร้อม Boundary ให้เองอัตโนมัติ
       opts.body = data;
     } else {
-      // สำหรับข้อมูล JSON ปกติ
       opts.headers["Content-Type"] = "application/json";
       if (data) opts.body = JSON.stringify(data);
     }
@@ -22,14 +17,12 @@ const API = {
     try {
       const res = await fetch(url, opts);
       if (!res.ok) {
-        // ถ้าเซิร์ฟเวอร์ตอบกลับมาเป็น Error (เช่น 400, 500) ให้ดึงข้อความ error มาโชว์
         const errorData = await res.json();
         throw new Error(errorData.message || `Error ${res.status}`);
       }
       return res.json();
     } catch (err) {
       console.error("API Request Error:", err);
-      // ส่งคืนโครงสร้างที่ frontend คาดหวัง เพื่อไม่ให้หน้าเว็บค้าง
       return { success: false, message: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้" };
     }
   },
@@ -39,26 +32,23 @@ const API = {
   delete: (url) => API.request("DELETE", url),
 };
 
-// ─── Auth state ───────────────────────────────────────────────────────────────
+// Auth state 
 let currentUser = null;
 
 async function loadAuth() {
   try {
-    // เช็ค Hardcode Admin ก่อน
     if (localStorage.getItem("isAdmin") === "true") {
       const adminUser = JSON.parse(localStorage.getItem("adminUser"));
       renderUserChip(adminUser);
       return adminUser;
     }
 
-    // ถ้าไม่ใช่ Admin เช็คจาก Server ปกติ
     const res = await API.get("/auth/me");
     if (res.loggedIn) {
       currentUser = res.user;
       renderUserChip(res.user);
       return res.user;
     } else {
-      // หน้าที่ต้องล็อกอิน (เพิ่ม admin เข้าไปด้วย)
       const protectedPages = [
         "dashboard",
         "my-checklists",
@@ -94,27 +84,18 @@ function renderUserChip(user) {
   }
 }
 
-// ─── Logout ───────────────────────────────────────────────────────────────────
-// ─── Logout (ปรับปรุงให้รองรับการเช็ค) ──────────────────────────────────────────────────────────
+// Logout 
 async function logout() {
-  // 1. ล้างค่าทุกอย่างใน LocalStorage (ทั้ง Admin และ User ปกติ)
   localStorage.clear();
-
-  // 2. ล้างค่าใน SessionStorage (เผื่อมีการเก็บไว้)
   sessionStorage.clear();
-
   try {
-    // 3. เรียก API ไปบอก Server ให้ทำลาย Session/Cookie ด้วย
     await fetch("/auth/logout", { method: "POST", credentials: "include" });
   } catch (err) {
     console.log("Server logout failed, but clearing local data anyway.");
   }
-
-  // 4. บังคับเปลี่ยนหน้าไปที่ Login และไม่ให้กด Back กลับมาได้
   window.location.replace("/pages/login.html");
 }
 
-// ─── ส่วนที่เหลือ (Toast, setActiveNav, etc.) เหมือนเดิม ──────────────────────
 function toast(message, type = "success") {
   let container = document.querySelector(".toast-container");
   if (!container) {

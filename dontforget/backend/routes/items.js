@@ -1,16 +1,9 @@
-// backend/routes/items.js
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const { isAuthenticated } = require("../middleware/auth");
-
-// ─── 1. เปลี่ยนการนำเข้าเป็น Cloudinary ─────────────────────────────────────────
-// ใช้ uploadCover หรือจะใช้ uploadGallery ก็ได้ตามความเหมาะสมของขนาดรูป
 const { uploadCover } = require("../config/cloudinary");
 
-// ❌ ลบ Multer Local Storage และ Path เดิมออก
-
-// helper: ตรวจเจ้าของ checklist (คงเดิม)
 async function verifyOwner(checklistID, userID) {
   const [rows] = await db.query(
     "SELECT userID FROM checklists WHERE checklistID = ?",
@@ -19,7 +12,7 @@ async function verifyOwner(checklistID, userID) {
   return rows.length && rows[0].userID === userID;
 }
 
-// ─── POST / — เพิ่ม Item (คงเดิมเพราะไม่มีอัปโหลดรูปในหน้านี้) ──────────────────────
+// POST / — เพิ่ม Item 
 router.post("/", isAuthenticated, async (req, res) => {
   const { checklistID, itemText } = req.body;
   if (!checklistID || !itemText?.trim()) {
@@ -47,7 +40,7 @@ router.post("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// ─── 2. PUT /:id — แก้ไข Item (เปลี่ยนเป็น Cloudinary) ───────────────────────────
+// PUT /:id — แก้ไข Item 
 router.put(
   "/:id",
   isAuthenticated,
@@ -78,11 +71,9 @@ router.put(
         sql += " sortOrder=?,";
         params.push(sortOrder);
       }
-
-      // ─── 3. เปลี่ยนการเก็บ path เป็น Cloudinary URL ─────────────────────────────
       if (req.file) {
         sql += " imageURL=?,";
-        params.push(req.file.path); // ใช้ URL เต็มจาก Cloudinary
+        params.push(req.file.path);
       }
 
       if (params.length === 0) return res.json({ success: true });
@@ -98,7 +89,7 @@ router.put(
   },
 );
 
-// ─── DELETE /:id — ลบ Item (คงเดิม) ───────────────────────────────────────────
+// DELETE /:id — ลบ Item 
 router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const [item] = await db.query(
