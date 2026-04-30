@@ -58,23 +58,15 @@
       .filter-row {
         display: flex;
         gap: 10px;
-        flex-wrap: nowrap; 
+        flex-wrap: wrap; 
         margin-bottom: 24px;
         align-items: center;
-        overflow: hidden;
       }
       #cat-chips {
-  display: flex;
-  gap: 10px;
-  flex-wrap: nowrap;      /* ✅ แก้ตรงนี้ */
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-#cat-chips::-webkit-scrollbar {
-  display: none;
-}
+        display: flex;
+        gap: 10px;
+        flex-wrap: nowrap;
+      }
       .filter-chip {
         padding: 8px 16px;
         border-radius: 12px; 
