@@ -19,6 +19,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 20px;
+        flex-shrink: 0;
       }
       .community-hero::before {
         content: "";
@@ -66,6 +67,7 @@
         margin-bottom: 24px;
         align-items: center;
         overflow: hidden;
+        flex-shrink: 0;
       }
       #cat-chips {
         display: flex;
@@ -97,6 +99,10 @@
         background: var(--accent);
         color: #000;
         border-color: var(--accent);
+      }
+      #community-grid {
+        min-height: 0;
+        padding-bottom: 32px;
       }
       .community-grid {
         display: grid;
@@ -344,7 +350,6 @@
     <script>
       let allCategories = [];
       let selectedCategory = null;
-      let selectedInterests = new Set();
       let searchTimer = null;
       let currentReportID = null;
 
@@ -395,7 +400,8 @@
         const chips = document.getElementById("cat-chips");
         let html = `<div class="filter-chip ${!selectedCategory ? "active" : ""}" onclick="filterCategory(null, this)">ทั้งหมด</div>`;
         html += allCategories.map((c) => `
-          <div class="filter-chip ${c.categoryID == selectedCategory ? "active" : ""}" onclick="filterCategory(${c.categoryID}, this)">
+          <div class="filter-chip ${c.categoryID == selectedCategory ? "active" : ""}"
+               onclick="filterCategory(${c.categoryID}, this)">
             ${c.icon || ""} ${c.categoryName}
           </div>`).join("");
         chips.innerHTML = html;
