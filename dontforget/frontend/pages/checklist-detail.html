@@ -539,6 +539,9 @@
         renderSelectedPreview();
         input.value = "";
         // เรนเดอร์พรีวิวของไฟล์ที่เลือก
+        
+        
+      }
         function renderSelectedPreview() {
           const container = document.getElementById("selected-preview-list");
           const uploadBtn = document.getElementById("btn-upload-now");
@@ -569,7 +572,7 @@
             reader.readAsDataURL(file);
           });
         }
-        // ลบไฟล์ที่เลือกออกจากรายการและอัปเดตพรีวิว
+      // ลบไฟล์ที่เลือกออกจากรายการและอัปเดตพรีวิว
         function removeSpecificFile(index) {
           selectedFiles.splice(index, 1);
           renderSelectedPreview();
@@ -580,7 +583,6 @@
           renderSelectedPreview();
         }
         
-      }
       // อัปโหลดรูปภาพที่เลือกไปยัง Gallery
         async function uploadToGallery() {
           if (selectedFiles.length === 0) return;
