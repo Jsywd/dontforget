@@ -108,7 +108,7 @@ router.get(
     scope: ["profile", "email"],
   }),
 );
-
+// Google OAuth callback
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/pages/login.html" }),

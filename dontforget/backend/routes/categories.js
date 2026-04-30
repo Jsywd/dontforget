@@ -27,7 +27,8 @@ router.get("/interests", isAuthenticated, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
+// POST /interests — บันทึกความสนใจของผู้ใช้
+// ยังไม่มี
 router.post("/interests", isAuthenticated, async (req, res) => {
   const { categoryIDs } = req.body;
   try {

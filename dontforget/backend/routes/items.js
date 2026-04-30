@@ -12,7 +12,7 @@ async function verifyOwner(checklistID, userID) {
   return rows.length && rows[0].userID === userID;
 }
 
-// POST / — เพิ่ม Item 
+// POST / เพิ่ม Item 
 router.post("/", isAuthenticated, async (req, res) => {
   const { checklistID, itemText } = req.body;
   if (!checklistID || !itemText?.trim()) {
@@ -40,7 +40,7 @@ router.post("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// PUT /:id — แก้ไข Item 
+// PUT /:id แก้ไข Item 
 router.put(
   "/:id",
   isAuthenticated,
@@ -89,7 +89,7 @@ router.put(
   },
 );
 
-// DELETE /:id — ลบ Item 
+// DELETE /:id ลบ Item 
 router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const [item] = await db.query(

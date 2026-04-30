@@ -292,13 +292,13 @@
       let allChecklists = [];
       let categories = [];
       let currentFilter = null;
-
+      // โหลดข้อมูลเมื่อเปิดหน้า
       document.addEventListener("DOMContentLoaded", async () => {
         await loadAuth();
         await loadCategories();
         await loadChecklists();
       });
-
+      // โหลดหมวดหมู่
       async function loadCategories() {
         const res = await API.get("/api/categories");
         if (res.success) {
@@ -319,7 +319,7 @@
           });
         }
       }
-
+      // โหลด Checklist ของผู้ใช้
       async function loadChecklists() {
         const res = await API.get("/api/checklists/my");
         if (res.success) {
@@ -327,7 +327,7 @@
           renderChecklists(allChecklists);
         }
       }
-
+      // กรอง Checklist ตามหมวดหมู่
       function filterBy(categoryID, btn) {
         currentFilter = categoryID;
         document
@@ -339,7 +339,7 @@
           : allChecklists;
         renderChecklists(filtered);
       }
-
+      // แสดงรายการ Checklist
       function renderChecklists(list) {
         const grid = document.getElementById("checklist-grid");
         if (!list.length) {
@@ -386,7 +386,7 @@
             .join("") +
           `</div>`;
       }
-
+      // เปิดหน้าต่างป้อปอัพสำหรับสร้าง Checklist ใหม่
       function openCreateModal() {
         document.getElementById("edit-id").value = "";
         document.getElementById("modal-title").textContent =
@@ -400,7 +400,7 @@
           .forEach((el, i) => el.classList.toggle("active", i === 0));
         document.getElementById("cl-modal").classList.add("show");
       }
-
+      // แก้ไข Checklist
       async function editChecklist(id) {
         const cl = allChecklists.find((c) => c.checklistID == id);
         if (!cl) return;
@@ -417,7 +417,7 @@
           );
         document.getElementById("cl-modal").classList.add("show");
       }
-
+      // เลือก ส่วนตัว หรือ สาธารณะ
       function setVisibility(val, el) {
         document.getElementById("cl-public").value = val;
         document
@@ -425,11 +425,11 @@
           .forEach((e) => e.classList.remove("active"));
         el.classList.add("active");
       }
-
+      // ปิดหน้าต่างป้อปอัพ
       function closeModal() {
         document.getElementById("cl-modal").classList.remove("show");
       }
-
+      // บันทึกการสร้างหรือแก้ไข Checklist
       async function saveChecklist() {
         const id = document.getElementById("edit-id").value;
         const title = document.getElementById("cl-title").value.trim();
@@ -457,7 +457,7 @@
           toast(res.message || "เกิดข้อผิดพลาด", "error");
         }
       }
-
+      // ลบ Checklist
       async function deleteChecklist(id, e) {
         e.stopPropagation();
         if (!confirm("ลบ Checklist นี้หรือไม่?")) return;

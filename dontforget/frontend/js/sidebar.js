@@ -71,7 +71,7 @@ function getSidebarContent(isAdmin) {
     </aside>`;
   }
 }
-
+// ตรวจสอบสถานะล็อกอินและโหลดข้อมูลผู้ใช้
 document.addEventListener("DOMContentLoaded", async () => {
   const target = document.getElementById("sidebar-mount");
   if (!target) return;

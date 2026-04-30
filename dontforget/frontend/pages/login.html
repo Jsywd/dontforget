@@ -247,7 +247,7 @@
           }
         })
         .catch(() => {});
-
+        // สลับแท็บระหว่างเข้าสู่ระบบและสมัครสมาชิก
       function switchTab(tab) {
         document.querySelectorAll(".auth-tab").forEach((t, i) => {
           t.classList.toggle(
@@ -263,13 +263,13 @@
           .classList.toggle("active", tab === "register");
         showError("");
       }
-
+      
       function showError(msg) {
         const el = document.getElementById("error-msg");
         el.textContent = msg;
         el.style.display = msg ? "block" : "none";
       }
-
+      // เข้าสู่ระบบ
       async function doLogin() {
         const email = document.getElementById("login-email").value.trim();
         const password = document.getElementById("login-password").value;
@@ -301,7 +301,7 @@
           showError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
         }
       }
-
+      // สมัครสมาชิก
       async function doRegister() {
         const username = document.getElementById("reg-username").value.trim();
         const email = document.getElementById("reg-email").value.trim();
@@ -321,7 +321,7 @@
           showError("เกิดข้อผิดพลาด");
         }
       }
-
+      // กด Enter เพื่อเข้าสู่ระบบหรือสมัครสมาชิก
       document.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           if (

@@ -1,8 +1,9 @@
+// Middleware สำหรับตรวจสอบการเข้าสู่ระบบ
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.status(401).json({ success: false, message: "กรุณาเข้าสู่ระบบ" });
 }
-
+// Middleware สำหรับหน้าเว็บที่ต้องการให้ผู้ใช้เข้าสู่ระบบ
 function isAuthenticatedPage(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/pages/login.html");

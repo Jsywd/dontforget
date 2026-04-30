@@ -142,7 +142,7 @@ router.get("/:id", async (req, res) => {
       [req.params.id],
     );
 
-    // 4. ดึงสถานที่ทั้งหมดของ Checklist นี้ 
+    // ดึงสถานที่ทั้งหมดของ Checklist 
     const [allPlaces] = await db.query(
       `
       SELECT * FROM places WHERE checklistID = ?
@@ -348,7 +348,7 @@ router.get("/admin/reports", async (req, res) => {
     res.status(500).json({ success: false, message: "Database Error" });
   }
 });
-
+// ดำเนินการรีพอร์ต: ลบรีพอร์ต (แต่เก็บโพสต์ไว้)
 router.put("/admin/reports/:id", async (req, res) => {
   try {
 
@@ -366,7 +366,7 @@ router.put("/admin/reports/:id", async (req, res) => {
   }
 });
 
-// 3. ลบโพสต์ทิ้ง 
+// ลบโพสต์ทิ้ง 
 router.delete("/admin/posts/:id", async (req, res) => {
   try {
     await db.query("DELETE FROM checklists WHERE checklistID = ?", [

@@ -216,7 +216,6 @@
           </div>
         </div>
 
-        <!-- Recommended -->
         <div style="margin-bottom: 32px">
           <div class="section-header">
             <div class="section-title">🎯 แนะนำสำหรับคุณ</div>
@@ -252,6 +251,7 @@
     <script src="/js/app.js"></script>
     <script src="/js/sidebar.js"></script>
     <script>
+      // โหลดข้อมูลผู้ใช้และเช็คลิสต์แนะนำเมื่อหน้าโหลดเสร็จ
       document.addEventListener("DOMContentLoaded", async () => {
         const user = await loadAuth();
         if (!user) return;

@@ -379,7 +379,7 @@
       let selectedInterests = new Set();
       let searchTimer = null;
       let currentReportID = null; 
-
+      // โหลดหมวดหมู่และผลการค้นหาเมื่อหน้าโหลดเสร็จ
       document.addEventListener("DOMContentLoaded", async () => {
         // โหลดหมวดหมู่ 
         await loadCategories();
@@ -405,7 +405,7 @@
 
         doSearch();
       });
-
+      // ค้นหา Checklist ตามคำค้นและหมวดหมู่ที่เลือก
       async function doSearch() {
         const q = document.getElementById("search-input").value.trim();
         const sort = document.getElementById("sort-select").value;
@@ -437,7 +437,7 @@
           renderGrid([]); 
         }
       }
-
+      // โหลด Checklist ตามหมวดหมู่ที่เลือก
       async function loadCommunityData(catID = null) {
         const container = document.getElementById("community-list"); 
         if (!container) return;
@@ -465,7 +465,7 @@
             '<p class="error-text">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
         }
       }
-
+      // เรนเดอร์การ์ด Checklist ในผลการค้นหา
       function renderChecklistCard(c) {
         return `
         <div class="rec-card" onclick="location.href='/pages/checklist-detail.html?id=${c.checklistID}'">
@@ -479,7 +479,7 @@
         </div>
     `;
       }
-
+      // โหลดหมวดหมู่จาก API และแสดงเป็นชิปกรอง
       async function loadCategories(user) {
         const res = await API.get("/api/categories");
         if (!res.success) return;
@@ -502,7 +502,7 @@
 
         chips.innerHTML = html;
       }
-
+      // กรอง Checklist ตามหมวดหมู่ที่เลือกและค้นหาใหม่
       function filterCategory(id, el) {
         selectedCategory = id;
         document
@@ -511,7 +511,7 @@
         el.classList.add("active");
         doSearch();
       }
-
+      // ดีเลย์การค้นหาเมื่อพิมพ์ในช่องค้นหา
       function debounceSearch() {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(doSearch, 400);
@@ -523,7 +523,7 @@
         currentReportID = checklistID;
         document.getElementById("report-modal").classList.add("show");
       }
-
+      // ปิดโมดัลรายงานและรีเซ็ตฟอร์ม
       function closeReportModal() {
         document.getElementById("report-modal").classList.remove("show");
         document
@@ -531,7 +531,7 @@
           .forEach((cb) => (cb.checked = false));
         document.getElementById("report-text").value = "";
       }
-
+      // ส่งรายงานไปยัง API พร้อมสาเหตุและรายละเอียดที่ผู้ใช้ระบุ
       async function submitReport() {
         const selected = document.querySelectorAll(
           'input[name="reportReason"]:checked',
@@ -544,7 +544,7 @@
           alert("กรุณาเลือกสาเหตุอย่างน้อย 1 ข้อ");
           return;
         }
-
+        
         const res = await API.post("/api/checklists/reports", {
           checklistID: currentReportID,
           reasonType: reasons,
@@ -558,7 +558,7 @@
           alert(res.message || "เกิดข้อผิดพลาด");
         }
       }
-
+      // เรนเดอร์กริดของ Checklist ในผลการค้นหา
       function renderGrid(list) {
         const el = document.getElementById("community-grid");
         if (!list.length) {

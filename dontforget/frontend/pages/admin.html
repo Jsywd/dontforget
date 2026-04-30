@@ -233,7 +233,7 @@
         console.log("สลับกลับมาหน้าแอดมิน: กำลังอัปเดตข้อมูลล่าสุด...");
         loadReports();
       });
-
+      // ตรวจสอบสิทธิ์ผู้ใช้และโหลดข้อมูลรีพอร์ต
       document.addEventListener("DOMContentLoaded", async () => {
         try {
           const res = await API.get("/auth/me");
@@ -247,7 +247,7 @@
           window.location.href = "/pages/login.html";
         }
       });
-
+      // โหลดข้อมูลรีพอร์ตจากเซิร์ฟเวอร์
       async function loadReports() {
         try {
           const res = await API.get("/api/checklists/admin/reports");
@@ -255,7 +255,7 @@
 
           if (res && res.success && Array.isArray(res.data)) {
             const reports = res.data;
-
+            
             document.getElementById("total-reports").textContent =
               reports.length;
             document.getElementById("pending-reports").textContent =
@@ -266,7 +266,7 @@
                 '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">ยินดีด้วย! ไม่มีรีพอร์ตค้างในขณะนี้</div>';
               return;
             }
-
+            
             list.innerHTML = reports
               .map(
                 (r) => `
@@ -306,26 +306,26 @@
           console.error("โหลดข้อมูลล้มเหลว:", err);
         }
       }
-
+      // อัปเดตสถานะรีพอร์ต
       async function updateStatus(id, status) {
         try {
           const res = await API.put(`/api/checklists/admin/reports/${id}`, {
             status,
           });
           if (res.success) {
-            loadReports(); 
+            loadReports();
           }
         } catch (err) {
           alert("ไม่สามารถอัปเดตได้");
         }
       }
-
+      // ลบโพสต์ที่ถูกรายงาน
       async function deletePost(cID) {
         if (!confirm("ยืนยันการลบโพสต์นี้ถาวร?")) return;
         try {
           const res = await API.delete(`/api/checklists/admin/posts/${cID}`);
           if (res.success) {
-            loadReports(); 
+            loadReports();
           } else {
             alert("เกิดข้อผิดพลาด: " + res.message);
           }
@@ -333,11 +333,11 @@
           alert("ไม่สามารถลบได้");
         }
       }
-
+      
       let currentReportID = null;
-
+      
       function openReportModal(event, checklistID) {
-        if (event) event.stopPropagation(); 
+        if (event) event.stopPropagation();
         currentReportID = checklistID;
         const modal = document.getElementById("report-modal");
         if (modal) modal.classList.add("show");
@@ -365,7 +365,7 @@
           alert("กรุณาเลือกสาเหตุอย่างน้อย 1 ข้อ");
           return;
         }
-
+        
         try {
           const res = await API.post("/api/checklists/reports", {
             checklistID: currentReportID,
@@ -376,7 +376,7 @@
           if (res.success) {
             alert("ส่งรายงานเรียบร้อยแล้ว");
             closeReportModal();
-            loadReports(); 
+            loadReports();
           } else {
             alert(res.message || "เกิดข้อผิดพลาด");
           }

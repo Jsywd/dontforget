@@ -1,4 +1,3 @@
-/* frontend/css/style.css */
 @import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap");
 
 :root {
@@ -61,24 +60,20 @@ select {
   border: none;
 }
 
-/* ─── Layout ─────────────────────────────────────────────── */
-/* --- แก้ไขส่วน Layout --- */
-/* บังคับให้โครงสร้างภายนอกสุดสูงเท่าจอพอดี */
 html,
 body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* ห้ามเกิด scrollbar ที่ตัวบอดี้หลัก */
+  overflow: hidden; 
 }
 
 .app-layout {
   display: flex;
   width: 100vw;
-  height: 100vh; /* บังคับสูง 100% ของ Viewport */
+  height: 100vh; 
   background: var(--bg-primary);
 }
 
-/* ─── Sidebar ────────────────────────────────────────────── */
 .sidebar {
   width: 220px;
   background: var(--bg-secondary);
