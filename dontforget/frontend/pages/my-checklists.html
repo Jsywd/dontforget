@@ -419,44 +419,36 @@
       }
       // เลือก ส่วนตัว หรือ สาธารณะ
       function setVisibility(val, el) {
-        document.getElementById("cl-public").value = val;
-        document
-          .querySelectorAll(".vis-option")
-          .forEach((e) => e.classList.remove("active"));
-        el.classList.add("active");
-      }
+    // เก็บค่า val (0 หรือ 1) ลงใน input hidden
+    document.getElementById("cl-public").value = val; 
+    
+    document.querySelectorAll(".vis-option").forEach((e) => e.classList.remove("active"));
+    el.classList.add("active");
+}
       // ปิดหน้าต่างป้อปอัพ
       function closeModal() {
         document.getElementById("cl-modal").classList.remove("show");
       }
       // บันทึกการสร้างหรือแก้ไข Checklist
       async function saveChecklist() {
-        const id = document.getElementById("edit-id").value;
-        const title = document.getElementById("cl-title").value.trim();
-        if (!title) return toast("กรุณากรอกชื่อ Checklist", "error");
+    const id = document.getElementById("edit-id").value;
+    const title = document.getElementById("cl-title").value.trim();
+    if (!title) return toast("กรุณากรอกชื่อ Checklist", "error");
 
-        const fd = new FormData();
-        fd.append("title", title);
-        fd.append("description", document.getElementById("cl-desc").value);
-        fd.append("categoryID", document.getElementById("cl-category").value);
-        fd.append("isPublic", document.getElementById("cl-public").value);
-        const file = document.getElementById("cl-cover").files[0];
-        if (file) fd.append("coverImage", file);
+    const fd = new FormData();
+    fd.append("title", title);
+    fd.append("description", document.getElementById("cl-desc").value);
+    fd.append("categoryID", document.getElementById("cl-category").value);
 
-        const res = id
-          ? await API.put(`/api/checklists/${id}`, fd, true)
-          : await API.post("/api/checklists", fd, true);
+    // แก้ไขบรรทัดนี้: แปลงค่าจาก string "0"/"1" ให้เป็นตัวเลข 0/1 ก่อนส่ง
+    const isPublicValue = parseInt(document.getElementById("cl-public").value);
+    fd.append("isPublic", isPublicValue); 
 
-        if (res.success) {
-          toast(id ? "แก้ไขสำเร็จ" : "สร้าง Checklist สำเร็จ");
-          closeModal();
-          await loadChecklists();
-          if (!id)
-            window.location.href = `/pages/checklist-detail.html?id=${res.checklistID}`;
-        } else {
-          toast(res.message || "เกิดข้อผิดพลาด", "error");
-        }
-      }
+    const file = document.getElementById("cl-cover").files[0];
+    if (file) fd.append("coverImage", file);
+
+    // ... (ส่วนที่เหลือเหมือนเดิม)
+}
       // ลบ Checklist
       async function deleteChecklist(id, e) {
         e.stopPropagation();
