@@ -412,7 +412,7 @@
 
       const params = new URLSearchParams(location.search);
       const checklistID = params.get("id");
-
+      // โหลดข้อมูล Checklist เมื่อหน้าโหลดเสร็จ
       document.addEventListener("DOMContentLoaded", async () => {
         if (checklistID) {
           await loadChecklistData();
@@ -437,7 +437,7 @@
           hideActionsForAdmin();
         }
       });
-
+      // ดึงข้อมูล Checklist จาก API และเรนเดอร์ข้อมูลทั้งหมด
       async function loadChecklistData() {
         try {
           const res = await fetch(`/api/checklists/${checklistID}`, {
@@ -482,7 +482,7 @@
           document.head.appendChild(style);
         }
       }
-
+      // เรนเดอร์ส่วนหัวของ Checklist
       function renderHeader() {
         const oldDesc = document.getElementById("desc-box");
         if (oldDesc) oldDesc.remove();
@@ -530,7 +530,7 @@
           header.insertAdjacentElement("afterend", descBox);
         }
       }
-
+      // จัดการการเลือกไฟล์และแสดงพรีวิว
       function handleFileSelect(input) {
         const files = Array.from(input.files);
         if (files.length === 0) return;
@@ -538,7 +538,7 @@
         selectedFiles = [...selectedFiles, ...files];
         renderSelectedPreview();
         input.value = "";
-
+        // เรนเดอร์พรีวิวของไฟล์ที่เลือก
         function renderSelectedPreview() {
           const container = document.getElementById("selected-preview-list");
           const uploadBtn = document.getElementById("btn-upload-now");
@@ -569,17 +569,17 @@
             reader.readAsDataURL(file);
           });
         }
-
+        // ลบไฟล์ที่เลือกออกจากรายการและอัปเดตพรีวิว
         function removeSpecificFile(index) {
           selectedFiles.splice(index, 1);
           renderSelectedPreview();
         }
-
+        // clear ไฟล์ที่เลือกทั้งหมด
         function clearSelectedImages() {
           selectedFiles = [];
           renderSelectedPreview();
         }
-
+        // อัปโหลดรูปภาพที่เลือกไปยัง Gallery
         async function uploadToGallery() {
           if (selectedFiles.length === 0) return;
 
@@ -617,7 +617,7 @@
           }
         }
       }
-
+      // โหลดรูปภาพรีวิวจาก Gallery
       async function loadGalleryData() {
         try {
           const res = await fetch(`/api/checklist-gallery/${checklistID}`);
@@ -643,7 +643,7 @@
           console.error("Load gallery error", e);
         }
       }
-
+      // ลบรูปภาพจาก Gallery
       async function deleteGalleryImage(imageID) {
         if (!confirm("ลบรูปนี้ใช่ไหม?")) return;
 
@@ -655,7 +655,7 @@
 
           const result = await res.json();
           if (result.success) {
-            loadGalleryData(); 
+            loadGalleryData();
           } else {
             alert("ลบไม่สำเร็จ: " + result.message);
           }
@@ -664,21 +664,21 @@
           alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         }
       }
-
+      // เพิ่มรายการ
       async function addItem() {
         const input = document.getElementById("item-input");
         const text = input.value.trim();
         if (!text) return;
         await fetch("/api/items", {
           method: "POST",
-          credentials: "include", 
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ checklistID, itemText: text }),
         });
         input.value = "";
         loadChecklistData();
       }
-
+      // เรนเดอร์รายการ
       function renderItems() {
         const el = document.getElementById("items-list");
         const isOwner = checklist.isOwner;
@@ -705,7 +705,7 @@
           )
           .join("");
       }
-
+      // เริ่มต้นการแก้ไขรายการ และแทนที่ข้อความด้วย input
       function startEditItem(itemID) {
         const item = checklist.items.find((i) => i.itemID === itemID);
         if (!item) return;
@@ -727,7 +727,7 @@
         // บันทึกเมื่อกด Enter
         input.addEventListener("keydown", async (e) => {
           if (e.key === "Enter") await confirmEditItem(itemID, input.value);
-          if (e.key === "Escape") renderItems(); 
+          if (e.key === "Escape") renderItems();
         });
 
         // บันทึกเมื่อคลิกออก
@@ -735,24 +735,24 @@
           await confirmEditItem(itemID, input.value);
         });
       }
-
+      // ยืนยันการแก้ไขรายการ และอัปเดตข้อมูลในฐานข้อมูล
       async function confirmEditItem(itemID, newText) {
         const text = newText.trim();
         if (!text) {
           renderItems();
           return;
-        } 
+        }
 
         const item = checklist.items.find((i) => i.itemID === itemID);
         if (item && text === item.itemText) {
           renderItems();
           return;
-        } 
+        }
 
         try {
           await fetch(`/api/items/${itemID}`, {
             method: "PUT",
-            credentials: "include", 
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ isChecked: isChecked ? 1 : 0 }),
           });
@@ -767,7 +767,7 @@
           renderItems();
         }
       }
-
+      // อัปเดตสถานะการ ติ๊กถูก, ยกเลิกการติ๊กถูก
       async function toggleItem(itemID, isChecked) {
         await fetch(`/api/items/${itemID}`, {
           method: "PUT",
@@ -783,7 +783,7 @@
           loadChecklistData();
         }
       }
-
+      // เรนเดอร์รายการสถานที่
       function renderPlacesList() {
         const el = document.getElementById("places-list");
         const places = checklist.allPlaces || [];
@@ -817,7 +817,7 @@
         }
         el.innerHTML = html;
       }
-
+      // สลับไปที่แท็บแผนที่และเปิดฟอร์มเพิ่มสถานที่
       function switchToMapForAdd() {
         const btn = document.querySelector("button[onclick*=\"'map'\"]");
         switchTab("map", btn);
@@ -830,7 +830,7 @@
           loadChecklistData();
         }
       }
-
+      // ดึงตำแหน่งปัจจุบันของผู้ใช้ และอัปเดตแผนที่และฟอร์ม
       function getCurrentLocation() {
         if (!navigator.geolocation) return alert("ไม่รองรับการดึงตำแหน่ง");
         const nameInput = document.getElementById("new-place-name");
@@ -845,7 +845,7 @@
           (err) => alert("ดึงตำแหน่งไม่สำเร็จ"),
         );
       }
-
+      // ดึงที่อยู่จากพิกัด และอัปเดตฟอร์ม
       async function fetchAddress(lat, lng) {
         const nameInput = document.getElementById("new-place-name");
         document.getElementById("new-place-lat").value = lat;
@@ -863,7 +863,7 @@
           currentFullAddress = "ไม่พบที่อยู่";
         }
       }
-
+      // อัปเดต Marker ชั่วคราวเมื่อผู้ใช้เลือกตำแหน่งบนแผนที่
       function updateTempMarker(lat, lng) {
         if (tempNewMarker) mapInstance.removeLayer(tempNewMarker);
         tempNewMarker = L.circleMarker([lat, lng], {
@@ -874,7 +874,7 @@
         }).addTo(mapInstance);
         document.getElementById("add-place-form").classList.add("active");
       }
-
+      // เริ่มต้นแผนที่ หรือ อัปเดต Marker เมื่อข้อมูลสถานที่เปลี่ยนแปลง
       function initOrUpdateMap() {
         if (!mapInstance) {
           mapInstance = L.map("map-container").setView([13.75, 100.5], 10);
@@ -903,7 +903,7 @@
         }
         updateMapMarkers();
       }
-
+      // อัปเดต Marker บนแผนที่ตามสถานที่ใน Checklist
       function updateMapMarkers() {
         existingMarkers.forEach((m) => mapInstance.removeLayer(m));
         existingMarkers = [];
@@ -920,7 +920,7 @@
         if (bounds.length > 0)
           mapInstance.fitBounds(bounds, { padding: [50, 50] });
       }
-
+      // บันทึกสถานที่ใหม่ที่เพิ่มจากแผนที่
       async function saveNewPlace() {
         const name = document.getElementById("new-place-name").value;
         if (!name) return alert("กรุณาใส่ชื่อสถานที่");
@@ -963,7 +963,7 @@
             mapInstance.invalidateSize();
           }, 150);
       }
-
+      // คัดลอก Checklist
       async function copyChecklistToMyMine() {
         if (!checklistID) return;
 
@@ -977,7 +977,7 @@
 
             if (result.success) {
               alert("คัดลอกสำเร็จ! กำลังพาคุณไปที่หน้า Checklist ของคุณ");
-              window.location.href = "my-checklists.html"; 
+              window.location.href = "my-checklists.html";
             } else {
               alert("เกิดข้อผิดพลาด: " + result.message);
             }
@@ -987,10 +987,10 @@
           }
         }
       }
-
+      // ถูกเรียกเมื่อหน้าโหลดเสร็จ เพื่อเช็คว่าเป็น admin หรือไม่ และซ่อนส่วนที่ไม่ควรให้ admin เห็น
       const role = localStorage.getItem("role");
       if (role === "admin") {
-        // ซ่อนส่วนที่ใช้เพิ่มไอเทม 
+        // ซ่อนส่วนที่ใช้เพิ่มไอเทม
         const inputSection = document.querySelector(".item-input-container");
         if (inputSection) inputSection.style.display = "none";
 
