@@ -189,7 +189,7 @@ router.post(
           description || null,
           categoryID || null,
           coverImage,
-          isPublic ? 1 : 0,
+          parseInt(isPublic) === 1 ? 1 : 0
         ],
       );
       res.json({ success: true, checklistID: result.insertId });
@@ -222,7 +222,7 @@ router.put(
         title,
         description || null,
         categoryID || null,
-        isPublic ? 1 : 0,
+        parseInt(isPublic) === 1 ? 1 : 0
       ];
 
       if (req.file) {
@@ -305,7 +305,6 @@ router.post("/:id/copy", isAuthenticated, async (req, res) => {
   }
 });
 
-module.exports = router;
 
 // API สำหรับผู้ใช้ทั่วไป ส่งรายงาน (Report)
 router.post("/reports", async (req, res) => {
@@ -377,3 +376,5 @@ router.delete("/admin/posts/:id", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+module.exports = router;

@@ -442,7 +442,7 @@
 
         // แปลงค่าจาก string "0"/"1" ให้เป็นตัวเลข 0/1 ก่อนส่ง
         const isPublicValue = parseInt(document.getElementById("cl-public").value);
-        fd.append("isPublic", isPublicValue); 
+        fd.append("isPublic", isPublicValue === 1 ? "1" : "0"); 
 
         const fileInput = document.getElementById("cl-cover");
         if (fileInput.files.length > 0) {
