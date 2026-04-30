@@ -579,7 +579,9 @@
           selectedFiles = [];
           renderSelectedPreview();
         }
-        // อัปโหลดรูปภาพที่เลือกไปยัง Gallery
+        
+      }
+      // อัปโหลดรูปภาพที่เลือกไปยัง Gallery
         async function uploadToGallery() {
           if (selectedFiles.length === 0) return;
 
@@ -616,7 +618,6 @@
             btn.disabled = false;
           }
         }
-      }
       // โหลดรูปภาพรีวิวจาก Gallery
       async function loadGalleryData() {
         try {
