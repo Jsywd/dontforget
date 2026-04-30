@@ -248,6 +248,7 @@ body {
   background: var(--bg-primary); 
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 }
 
 .main-content::-webkit-scrollbar {
@@ -651,4 +652,17 @@ textarea.form-input {
   background: rgba(239, 68, 68, 0.25);
   border-color: #ef4444;
   color: #ff6b6b;
+}
+
+#cat-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+#cat-chips::-webkit-scrollbar {
+  display: none;
 }
